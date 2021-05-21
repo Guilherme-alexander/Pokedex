@@ -1,0 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+*{
+	margin: 0;
+	padding:0;
+	box-sizing: border-box;
+}
+body{
+	background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+	font-family:'Noto Sans JP', sans-serif,rubik;
+}
+
+.container {
+	padding: 40px;
+	margin: 0 auto;
+}
+
+.logo {
+	width:50vw;
+	min-width:400px;
+    height:300px;
+	margin-bottom: 20px;
+    background-image:url('https://cdn-0.imagensemoldes.com.br/wp-content/uploads/2020/04/Pok%C3%A9mon-Logo-PNG-1024x768.png');
+    background-size:cover;
+    background-position:center;
+}
+.content{
+	width:100%;
+	display:flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	text-align: center;
+}
+
+button.reset{
+	width:300px;
+	height:38px;
+	position: relative;
+	top:-50px;
+	display: block;
+	font-size: 18px;
+	font-weight: bold;
+	border:1px solid  #fffdfd;
+	color:white;
+	background-color: #2b88a7;
+	border-radius: 20px;
+	margin:5px;
+	cursor:pointer;
+	transition: 2s;
+	
+}
+button.menu{
+	width:300px;
+	height:38px;
+	position: relative;
+	top:-50px;
+	display: block;
+	font-size: 18px;
+	font-weight: bold;
+	border:1px solid #fffdfd;
+	color:white;
+	background-color: #2b88a7;
+	border-radius: 20px;
+	margin:5px;
+	cursor:pointer;
+	transition: 2s;
+}
+button.reset:hover,
+button.menu:hover{
+	background:#275767;
+}
+button{
+	width:120px;
+	height:38px;
+	border:0;
+	border-radius: 25px;
+	margin:5px;
+	cursor:pointer;
+	transition:1.8s;
+}
+button#btn1{
+	color:white;
+	font-size:17px;
+	background-color:#fd7d24;
+	border:2px solid white;
+}
+button#btn2{
+	color:white;
+	font-size:17px;
+	background-color:#1E90FF;
+	border:2px solid white;
+}
+button#btn3{
+	color:white;
+	font-size:17px;
+	background-color:#9bcc50;
+	border:2px solid white;
+}
+button#btn4{
+	color:white;
+	font-size:17px;
+	background-color:#526a36;
+	border:2px solid white;
+}
+button#btn5{
+	color:white;
+	font-size:17px;
+	background-color:#999;
+	border:2px solid white;
+}
+button#btn6{
+	color:white;
+	font-size:17px;
+	background-color:#b97fc9;
+	border:2px solid white;
+}
+button#btn7{
+	color:white;
+	font-size:17px;
+	background-color:#ffbd00;
+	border:2px solid white;
+}
+button#btn8{
+	color:white;
+	font-size:17px;
+	background-color:#db5;
+	border:2px solid white;
+}
+button#btn9{
+	color:white;
+	font-size:17px;
+	background-color:#e27a9d;
+	border:2px solid white;
+}
+button#btn10{
+	color:white;
+	font-size:17px;
+	background-color:#dc439d;
+	border:2px solid white;
+}
+button#btn11{
+	color:white;
+	font-size:17px;
+	background-color:#ea3b3b;
+	border:2px solid white;
+}
+button#btn12{
+	color:white;
+	font-size:17px;
+	background-color:#a38c21;
+	border:2px solid white;
+}
+button#btn13{
+	color:white;
+	font-size:17px;
+	background-color:#7b62a3;
+	border:2px solid white;
+}
+button#btn14{
+	color:white;
+	font-size:17px;
+	background-color:#51c4e7;
+	border:2px solid white;
+}
+button#btn15{
+	color:white;
+	font-size:17px;
+	background-color:#76e;
+	border:2px solid white;
+}
+button#btn16{
+	color:white;
+	font-size:17px;
+	background-color:#111111;
+	border:2px solid white;
+}
+button#btn17{
+	color:white;
+	font-size:17px;
+	background-color:#6a6a6a;
+	border:2px solid white;
+}
+button#btn18{
+	color:white;
+	font-size:17px;
+	background-color:#6a6a6a;
+	border:2px solid white;
+}
+.pokedex {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	grid-gap: 20px;
+	padding-inline-start: 0;
+}
+
+.card {
+	list-style: none;
+	padding: 20px;
+	background-color: #f4f4f4;
+	color: #222;
+	text-align: center;
+	border-radius: 20px;
+    cursor: pointer;
+}
+
+.card:hover {
+	animation: bounce 0.5s linear;
+}
+
+.card-title {
+	text-transform: capitalize;
+	margin-bottom: 0px;
+	font-size: 32px;
+	font-weight: normal;
+}
+.card-subtitle {
+	margin-top: 5px;
+	color: #676;
+	font-weight: lighter;
+}
+
+.card-image {
+	height: 180px;
+}
+
+@keyframes bounce {
+	20% {
+			transform: translateY(-6px);
+	}
+	40% {
+			transform: translateY(0px);
+	}
+
+	80% {
+			transform: translateY(-2px);
+	}
+	100% {
+			transform: translateY(0);
+	}
+}
+
+@media screen and (max-width:900px){
+	
+}
