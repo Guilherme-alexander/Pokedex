@@ -1,14 +1,24 @@
-# Pokedex
-## Pokedex com 493 Pokemons 
+<br/>
+
+<div align="center">
+	<img height="200" src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi.svg?sanitize=true" alt="PokeAPI">
+</div>
+<br/>
+
+>## Code Requisição Ajax
 * JavaScriprt Ajax
 * api pokemon
 * Jquery para efeitos e botões 
+ 
+ [API DADOS POKÉMONs LINk](https://pokeapi.co/docs/v2)
+  ```https://pokeapi.co/api/v2/pokemon/${ID POKEMON}```
+ 
+ [API IMAGENS POKÉMONs LINk](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png")
+ 
 
-  [API DADOS POKÉMONs LINk](https://pokeapi.co/api/v2/pokemon/)
-  [API IMAGENS POKÉMONs LINk](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png")
-
-## Code Requisição Ajax
+># Pokedex com 493 Pokemons
 ![Image of Yaktocat](https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_8251_.jpeg)
+
 ```javascript
 const getPokemonUrl = id => `https://pokeapi.co/api/v2/pokemon/${id}`
 
@@ -45,12 +55,9 @@ const generatePokemonPromises = () => Array(493).fill().map((_, index) =>
 
 fetchPokemon()
 ```
-* Nome
-* Tipagem
-* Imagens
 
 ## Code Cards 
-* jquery
+>## jquery
 * click no card função seleciona todos tido que forem da mesmo fire, aqua trocando a cor de fundo do card
 
 ```Jquery 
@@ -62,7 +69,7 @@ fetchPokemon()
             $('.card-subtitle.fire').css('color','white')
         });
 ```
-## code botão Reset e API
+>## code botão Reset e API
 * botão API dispara um alert mostranso os Links da API
 * botão reset reseta lista
 ```Jquery
@@ -80,7 +87,7 @@ fetchPokemon()
             $('.card-subtitle').css('color','black')
         })
 ```
-## code dos botão
+>## code dos botão
 * jquery
 * botão função de selecionar todos pokemons que forem do mesmo tipo mostrar apenas do tipo selecionados 
 ```
@@ -96,7 +103,7 @@ fetchPokemon()
 ```
 ![Image of Yaktocat](https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_8317_.jpeg)
 
-## Designer Responsivo
+>## Designer Responsivo
 * display GRids
 * FlexBox
 
