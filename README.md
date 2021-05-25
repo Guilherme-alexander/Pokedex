@@ -1,7 +1,7 @@
 <br/>
 
 <div align="center">
-	<img height="200" src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi.svg?sanitize=true" alt="PokeAPI">
+	<img height="300" src="https://cdn-0.imagensemoldes.com.br/wp-content/uploads/2020/04/Pok%C3%A9mon-Logo-PNG-1024x768.png">
 </div>
 <br/>
 
