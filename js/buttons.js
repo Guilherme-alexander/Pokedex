@@ -19,7 +19,7 @@
             $('.card-title.fire').css('color','white')
             $('.card-subtitle.fire').css('color','white')
             $('.card').css('display','none')
-            $('.card.fire').css('display','block') 
+            $('.card.fire').css('display','block')
         })
         //water
         $('#btn2').on('click',function(){

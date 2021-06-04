@@ -1,4 +1,3 @@
-  
         //fire
         $('.container').on('click','.card.fire',function(){
             $('.card.fire').css('background','#fd7d24')

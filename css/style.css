@@ -222,6 +222,10 @@ button#btn18{
 	height: 180px;
 }
 
+p.card-move{
+	display:none;
+} 
+
 @keyframes bounce {
 	20% {
 			transform: translateY(-6px);

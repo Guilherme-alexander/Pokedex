@@ -1,7 +1,7 @@
 const getPokemonUrl = id => `https://pokeapi.co/api/v2/pokemon/${id}`
 
 //4 geração pokemon final=>493
-const generatePokemonPromises = () => Array(493).fill().map((_, index) =>
+const generatePokemonPromises = () => Array(93).fill().map((_, index) =>
 	fetch(getPokemonUrl(index + 1)).then(response => response.json()))
 		
 	const fetchPokemon = () =>{
@@ -21,7 +21,7 @@ const generatePokemonPromises = () => Array(493).fill().map((_, index) =>
 				<img class="card-imagens ${types[0]}" alt="${pokemon.name}" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png" />
 				  <h2 class="card-title ${types[0]}">${pokemon.id}. ${pokemon.name}</h2>
 				  <p class="card-subtitle ${types[0]}">${types.join(' / ')}</p>
-				  <p class="card-move ${types[0]}">${move[0]}</p>
+				  <p class="card-move ${types[0]}">${move.join(' / ')}</p>
 				</li>
 			` 
 			return accumulator
