@@ -1,3 +1,4 @@
+ 
         //fire
         $('.container').on('click','.card.fire',function(){
             $('.card.fire').css('background','#fd7d24')
@@ -106,3 +107,7 @@
             $('.card-title.steel').css('color','white')
             $('.card-subtitle.steel').css('color','white')
         })
+
+        
+
+        

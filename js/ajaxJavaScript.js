@@ -1,7 +1,7 @@
 const getPokemonUrl = id => `https://pokeapi.co/api/v2/pokemon/${id}`
 
 //4 geração pokemon final=>493
-const generatePokemonPromises = () => Array(93).fill().map((_, index) =>
+const generatePokemonPromises = () => Array(493).fill().map((_, index) =>
 	fetch(getPokemonUrl(index + 1)).then(response => response.json()))
 		
 	const fetchPokemon = () =>{
@@ -10,7 +10,7 @@ const generatePokemonPromises = () => Array(93).fill().map((_, index) =>
 
 	Promise.all(pokemonPomises)
 	.then(pokemons => {
-		console.log(pokemons)
+		/*console.log(pokemons)*/
 
 		const lisPokemons = pokemons.reduce((accumulator,pokemon) => {
 			const types = pokemon.types.map(typeInfo => typeInfo.type.name)
@@ -33,4 +33,4 @@ const generatePokemonPromises = () => Array(93).fill().map((_, index) =>
 	})
 }
 
-fetchPokemon()
+fetchPokemon();

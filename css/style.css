@@ -224,7 +224,21 @@ button#btn18{
 
 p.card-move{
 	display:none;
-} 
+}
+
+input[type=submit]{
+	background:white;
+	color:black;
+	border-radius:8px;
+	border:1px solid black;
+	margin-top:8px;
+	padding:8px 15px;
+}
+input[type=submit]:hover{
+	background:black;
+	color:white;
+	border:0;
+}
 
 @keyframes bounce {
 	20% {

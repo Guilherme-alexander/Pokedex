@@ -11,6 +11,7 @@
             $('.card').css('background','white')
             $('.card-title').css('color','black')
             $('.card-subtitle').css('color','black')
+            $('.card-move').css('display','none')
         })
 
         //fire
