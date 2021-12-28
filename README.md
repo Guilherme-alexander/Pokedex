@@ -1,24 +1,47 @@
+<div align="center">
+	
+# Pokedex com 493 Pokemons
+
+</div>
+
 <br/>
 
 <div align="center">
 	<img height="300" src="https://cdn-0.imagensemoldes.com.br/wp-content/uploads/2020/04/Pok%C3%A9mon-Logo-PNG-1024x768.png">
 </div>
+
 <br/>
 
->## Code Requisição Ajax
-* JavaScriprt Ajax
-* api pokemon
-* Jquery para efeitos e botões 
- 
+>## Requisição Ajax / Consumo de API
+
+* JavaScriprt
+  * api <br/>
+  
+* Jquery
+  * efeitos 
+  * botões <br/>
+
+<br/>
+
+ >## Código Requisição Ajax Links
+
  [API DADOS POKÉMONs LINk](https://pokeapi.co/docs/v2)
-  ```https://pokeapi.co/api/v2/pokemon/${ID POKEMON}```
  
+ 
+ ```https://pokeapi.co/api/v2/pokemon/25```
+  
+<br/>
+
  [API IMAGENS POKÉMONs LINk](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png")
  
+```https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png```
 
-># Pokedex com 493 Pokemons
-![Image of Yaktocat](https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_8251_.jpeg)
+#
 
+<br/>
+
+## Código Requisição Ajax 
+>### JavaScript
 ```javascript
 const getPokemonUrl = id => `https://pokeapi.co/api/v2/pokemon/${id}`
 
@@ -55,24 +78,14 @@ const generatePokemonPromises = () => Array(493).fill().map((_, index) =>
 
 fetchPokemon()
 ```
+<br/>
+<br/>
 
-## Code Cards 
->## jquery
-* click no card função seleciona todos tido que forem da mesmo fire, aqua trocando a cor de fundo do card
-
-```Jquery 
-//Jquery
-//type fire
-        $('.container').on('click','.card.fire',function(){
-            $('.card.fire').css('background','#fd7d24')
-            $('.card-title.fire').css('color','white')
-            $('.card-subtitle.fire').css('color','white')
-        });
-```
->## code botão Reset e API
+## Código / link API / botão Reset 
+>### jquery
 * botão API dispara um alert mostranso os Links da API
 * botão reset reseta lista
-```Jquery
+```javascript
 //home
         $('.menu').on('click',function(){
             alert('API Info-> https://pokeapi.co/api/v2/pokemon/id=pokemon')
@@ -87,24 +100,66 @@ fetchPokemon()
             $('.card-subtitle').css('color','black')
         })
 ```
->## code dos botão
-* jquery
-* botão função de selecionar todos pokemons que forem do mesmo tipo mostrar apenas do tipo selecionados 
-```
- //fire
-        $('#btn1').on('click',function(){
+
+<br/>
+<br/>
+
+<div align="center">
+	
+# Pokedex com 493 Pokemons
+
+</div>
+
+![Image of Yaktocat](https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_8251_.jpeg)
+
+<br/>
+
+## Código para filtrar por tipo 
+
+>### jquery
+
+* click no card função seleciona todos tido que forem da mesmo fire, aqua trocando a cor de fundo do card
+
+```javascript 
+//type fire
+        $('.container').on('click','.card.fire',function(){
             $('.card.fire').css('background','#fd7d24')
             $('.card-title.fire').css('color','white')
             $('.card-subtitle.fire').css('color','white')
-            $('.card').css('display','none')
-            $('.card.fire').css('display','block') 
-        })
-
+        });
 ```
+
+<br/>
+
+<div align="center">
+	
+# Pokedex Apenas Do Tipo Fogo
+
+</div>
+
 ![Image of Yaktocat](https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_8317_.jpeg)
 
->## Designer Responsivo
-* display GRids
-* FlexBox
+<br/>
+<br/>
 
-![Image of Yaktocat](https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_842_.jpeg)
+# Responsividade
+
+>### css
+* Responsivo
+  * Display Grids
+  * FlexBox
+  
+<div align="center">
+	<h3>Pokedex Responsiva</h3>
+</div>
+
+<div align="center">
+	<img width="50%" src="https://github.com/Guilherme-alexander/Pokedex/blob/main/Captura%20da%20Web_21-5-2021_842_.jpeg">
+</div>
+
+
+	
+	
+
+
+
