@@ -1,257 +1,229 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
-*{
-	margin: 0;
-	padding:0;
-	box-sizing: border-box;
-}
-body{
-	background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-	font-family:'Noto Sans JP', sans-serif,rubik;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap');
+
+:root {
+  --bg: #0d0d0f;
+  --bg-card: #18181c;
+  --bg-card-hover: #1f1f26;
+  --accent: #e8ff47;
+  --accent-dark: #b8cc2a;
+  --text-primary: #f0f0f0;
+  --text-muted: #888;
+  --border: rgba(255,255,255,0.07);
+  --radius: 16px;
+  --radius-sm: 8px;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.content {
+  width: 100%;
+  padding: 40px 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.page-title {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -1px;
+  color: var(--text-primary);
+}
+
+.page-title span {
+  color: var(--accent);
+}
+
+/* ── Nav Buttons ── */
+nav {
+  max-width: 860px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+button.btn {
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+button.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+button.btn:active {
+  transform: scale(0.96);
+}
+
+/* ── Grid ── */
 .container {
-	padding: 40px;
-	margin: 0 auto;
+  padding: 20px 40px 60px;
+  margin: 0 auto;
+  max-width: 1400px;
 }
 
-.logo {
-	width:50vw;
-	min-width:400px;
-    height:300px;
-	margin-bottom: 20px;
-    background-image:url('https://cdn-0.imagensemoldes.com.br/wp-content/uploads/2020/04/Pok%C3%A9mon-Logo-PNG-1024x768.png');
-    background-size:cover;
-    background-position:center;
-}
-.content{
-	width:100%;
-	display:flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	text-align: center;
-}
-
-button.reset{
-	width:300px;
-	height:38px;
-	position: relative;
-	top:-50px;
-	display: block;
-	font-size: 18px;
-	font-weight: bold;
-	border:1px solid  #fffdfd;
-	color:white;
-	background-color: #2b88a7;
-	border-radius: 20px;
-	margin:5px;
-	cursor:pointer;
-	transition: 2s;
-	
-}
-button.menu{
-	width:300px;
-	height:38px;
-	position: relative;
-	top:-50px;
-	display: block;
-	font-size: 18px;
-	font-weight: bold;
-	border:1px solid #fffdfd;
-	color:white;
-	background-color: #2b88a7;
-	border-radius: 20px;
-	margin:5px;
-	cursor:pointer;
-	transition: 2s;
-}
-button.reset:hover,
-button.menu:hover{
-	background:#275767;
-}
-button{
-	width:120px;
-	height:38px;
-	border:0;
-	border-radius: 25px;
-	margin:5px;
-	cursor:pointer;
-	transition:1.8s;
-}
-button#btn1{
-	color:white;
-	font-size:17px;
-	background-color:#fd7d24;
-	border:2px solid white;
-}
-button#btn2{
-	color:white;
-	font-size:17px;
-	background-color:#1E90FF;
-	border:2px solid white;
-}
-button#btn3{
-	color:white;
-	font-size:17px;
-	background-color:#9bcc50;
-	border:2px solid white;
-}
-button#btn4{
-	color:white;
-	font-size:17px;
-	background-color:#526a36;
-	border:2px solid white;
-}
-button#btn5{
-	color:white;
-	font-size:17px;
-	background-color:#999;
-	border:2px solid white;
-}
-button#btn6{
-	color:white;
-	font-size:17px;
-	background-color:#b97fc9;
-	border:2px solid white;
-}
-button#btn7{
-	color:white;
-	font-size:17px;
-	background-color:#ffbd00;
-	border:2px solid white;
-}
-button#btn8{
-	color:white;
-	font-size:17px;
-	background-color:#db5;
-	border:2px solid white;
-}
-button#btn9{
-	color:white;
-	font-size:17px;
-	background-color:#e27a9d;
-	border:2px solid white;
-}
-button#btn10{
-	color:white;
-	font-size:17px;
-	background-color:#dc439d;
-	border:2px solid white;
-}
-button#btn11{
-	color:white;
-	font-size:17px;
-	background-color:#ea3b3b;
-	border:2px solid white;
-}
-button#btn12{
-	color:white;
-	font-size:17px;
-	background-color:#a38c21;
-	border:2px solid white;
-}
-button#btn13{
-	color:white;
-	font-size:17px;
-	background-color:#7b62a3;
-	border:2px solid white;
-}
-button#btn14{
-	color:white;
-	font-size:17px;
-	background-color:#51c4e7;
-	border:2px solid white;
-}
-button#btn15{
-	color:white;
-	font-size:17px;
-	background-color:#76e;
-	border:2px solid white;
-}
-button#btn16{
-	color:white;
-	font-size:17px;
-	background-color:#111111;
-	border:2px solid white;
-}
-button#btn17{
-	color:white;
-	font-size:17px;
-	background-color:#6a6a6a;
-	border:2px solid white;
-}
-button#btn18{
-	color:white;
-	font-size:17px;
-	background-color:#6a6a6a;
-	border:2px solid white;
-}
 .pokedex {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-	grid-gap: 20px;
-	padding-inline-start: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding-inline-start: 0;
 }
 
+/* ── Cards ── */
 .card {
-	list-style: none;
-	padding: 20px;
-	background-color: #f4f4f4;
-	color: #222;
-	text-align: center;
-	border-radius: 20px;
-    cursor: pointer;
+  list-style: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.05;
+  transition: opacity 0.2s;
 }
 
 .card:hover {
-	animation: bounce 0.5s linear;
+  transform: translateY(-4px);
+  background: var(--bg-card-hover);
+  border-color: rgba(255,255,255,0.14);
+  animation: none;
+}
+
+.card:hover::before {
+  opacity: 0.1;
+}
+
+.card-imagens {
+  width: 120px;
+  height: 120px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  transition: transform 0.25s;
+}
+
+.card:hover .card-imagens {
+  transform: scale(1.1) translateY(-4px);
+}
+
+.card-id {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  align-self: flex-start;
 }
 
 .card-title {
-	text-transform: capitalize;
-	margin-bottom: 0px;
-	font-size: 32px;
-	font-weight: normal;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--text-primary);
+  align-self: flex-start;
+  margin-top: 2px;
 }
+
 .card-subtitle {
-	margin-top: 5px;
-	color: #676;
-	font-weight: lighter;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  align-self: flex-start;
+  margin-top: 4px;
 }
 
-.card-image {
-	height: 180px;
+.info {
+  margin-top: 12px;
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  letter-spacing: 0.5px;
 }
 
-p.card-move{
-	display:none;
+.info:hover {
+  background: rgba(232, 255, 71, 0.08);
+  border-color: var(--accent);
 }
 
-input[type=submit]{
-	background:white;
-	color:black;
-	border-radius:8px;
-	border:1px solid black;
-	margin-top:8px;
-	padding:8px 15px;
-}
-input[type=submit]:hover{
-	background:black;
-	color:white;
-	border:0;
-}
+/* ── Type Colors used as card color-hint (via currentColor on ::before) ── */
+.fire     { --type-color: #fd7d24; }
+.water    { --type-color: #1E90FF; }
+.grass    { --type-color: #9bcc50; }
+.bug      { --type-color: #526a36; }
+.flying   { --type-color: #aaa; }
+.poison   { --type-color: #b97fc9; }
+.electric { --type-color: #ffbd00; }
+.ground   { --type-color: #cdb25a; }
+.fairy    { --type-color: #e27a9d; }
+.psychic  { --type-color: #dc439d; }
+.fighting { --type-color: #ea3b3b; }
+.rock     { --type-color: #a38c21; }
+.ghost    { --type-color: #7b62a3; }
+.ice      { --type-color: #51c4e7; }
+.dragon   { --type-color: #7766ee; }
+.dark     { --type-color: #555; }
+.steel    { --type-color: #9ea0a5; }
+.normal   { --type-color: #aaa; }
 
-@keyframes bounce {
-	20% {
-			transform: translateY(-6px);
-	}
-	40% {
-			transform: translateY(0px);
-	}
+.card { color: var(--type-color, #888); }
 
-	80% {
-			transform: translateY(-2px);
-	}
-	100% {
-			transform: translateY(0);
-	}
+/* Loading state */
+.loading-text {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 80px;
+  font-size: 18px;
+  grid-column: 1/-1;
 }

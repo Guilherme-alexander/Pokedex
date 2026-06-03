@@ -1,45 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="css/style.css" rel="stylesheet" type="text/css">
-    <title>Pokemon - Pokedex</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/style.css" rel="stylesheet" type="text/css">
+  <title>Pokédex</title>
 </head>
 <body>
-    <div class="content">
-       
-        <a href="#"><div class="logo"></div><a/>
-        <button class="menu">Api</button>
-        <button class="reset">Reset List</button>
-        <button id="btn1">Fire</button>
-        <button id="btn2">Water</button>
-        <button id="btn3">Grass</button>
-        <button id="btn4">Bug</button>
-        <button id="btn5">Flying</button>
-        <button id="btn6">Poison</button>
-        <button id="btn7">Electric</button>
-        <button id="btn8">Ground</button>
-        <button id="btn9">Fairy</button>
-        <button id="btn10">Psychic</button>
-        <button id="btn11">Fighting</button>
-        <button id="btn12">Rock</button>
-        <button id="btn13">Ghost</button>
-        <button id="btn14">Ice</button>
-        <button id="btn15">Dragon</button>
-        <button id="btn16">Dark</button>
-        <button id="btn17">Steel</button>
-        <button id="btn18">Normal</button>
-    </div>
-    <div class="container">     
-        <ul data-js="pokedex" class="pokedex"></ul> 
-    </div>
-    <script src="js/Jquery.js"></script>
-    <script src="js/ajaxJavaScript.js"></script>
-    <script src="js/TypeColorJquery.js"></script>
-    <script src="js/buttons.js"></script>
-    <script>
-    </script>
+  <div class="content">
+    <h1 class="page-title">Poké<span>dex</span></h1>
+    <nav>
+      <button style="background:#fd7d24" class="btn" onclick="filterType('fire')">Fire</button>
+      <button style="background:#1E90FF" class="btn" onclick="filterType('water')">Water</button>
+      <button style="background:#78a84a" class="btn" onclick="filterType('grass')">Grass</button>
+      <button style="background:#526a36" class="btn" onclick="filterType('bug')">Bug</button>
+      <button style="background:#999"    class="btn" onclick="filterType('flying')">Flying</button>
+      <button style="background:#b97fc9" class="btn" onclick="filterType('poison')">Poison</button>
+      <button style="background:#ffbd00" class="btn" onclick="filterType('electric')">Electric</button>
+      <button style="background:#cdb25a" class="btn" onclick="filterType('ground')">Ground</button>
+      <button style="background:#e27a9d" class="btn" onclick="filterType('fairy')">Fairy</button>
+      <button style="background:#dc439d" class="btn" onclick="filterType('psychic')">Psychic</button>
+      <button style="background:#ea3b3b" class="btn" onclick="filterType('fighting')">Fighting</button>
+      <button style="background:#a38c21" class="btn" onclick="filterType('rock')">Rock</button>
+      <button style="background:#7b62a3" class="btn" onclick="filterType('ghost')">Ghost</button>
+      <button style="background:#51c4e7" class="btn" onclick="filterType('ice')">Ice</button>
+      <button style="background:#7766ee" class="btn" onclick="filterType('dragon')">Dragon</button>
+      <button style="background:#444"    class="btn" onclick="filterType('dark')">Dark</button>
+      <button style="background:#888"    class="btn" onclick="filterType('steel')">Steel</button>
+      <button style="background:#888"    class="btn" onclick="filterType('normal')">Normal</button>
+      <button style="background:#e8ff47;color:#111" class="btn" onclick="filterType('')">Todos</button>
+    </nav>
+  </div>
+
+  <div class="container">
+    <ul data-js="pokedex" class="pokedex"></ul>
+  </div>
+
+  <script src="js/requests.js"></script>
 </body>
 </html>

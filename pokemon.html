@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="css/status.css" rel="stylesheet" type="text/css">
+  <title>Pokédex - Pokémon</title>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back">← voltar</a>
+    <div class="pokemon-card" data-js="pokemon">
+      <div class="loading-screen">
+        <div class="pokeball-loader"></div>
+        <p>carregando...</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ─── Lookup tables ─── */
+const TYPE_COLORS = {
+  fire:'#fd7d24', water:'#1E90FF', grass:'#9bcc50', bug:'#7a9e4a',
+  flying:'#aaaaaa', poison:'#b97fc9', electric:'#ffbd00', ground:'#cdb25a',
+  fairy:'#e27a9d', psychic:'#dc439d', fighting:'#ea3b3b', rock:'#a38c21',
+  ghost:'#9b82d3', ice:'#51c4e7', dragon:'#9988ff', dark:'#777777',
+  steel:'#aaaaaa', normal:'#aaaaaa'
+}
+const STAT_COLORS = {
+  hp:'#ff5959', attack:'#f5ac78', defense:'#fae078',
+  'special-attack':'#9db7f5', 'special-defense':'#a7db8d', speed:'#fa92b2'
+}
+const STAT_LABELS = {
+  hp:'HP', attack:'Ataque', defense:'Defesa',
+  'special-attack':'Atq. Esp.', 'special-defense':'Def. Esp.', speed:'Velocidade'
+}
+
+/* Type effectiveness chart — all 18 types */
+const TYPE_CHART = {
+  normal:   { fighting:2, ghost:0 },
+  fire:     { water:2, ground:2, rock:2, fire:.5, grass:.5, ice:.5, bug:.5, steel:.5, fairy:.5 },
+  water:    { electric:2, grass:2, fire:.5, water:.5, ice:.5, steel:.5 },
+  electric: { ground:2, electric:.5, flying:.5, steel:.5 },
+  grass:    { fire:2, ice:2, poison:2, flying:2, bug:2, water:.5, electric:.5, grass:.5, ground:.5 },
+  ice:      { fire:2, fighting:2, rock:2, steel:2, ice:.5 },
+  fighting: { flying:2, psychic:2, fairy:2, bug:.5, rock:.5, dark:.5 },
+  poison:   { ground:2, psychic:2, fighting:.5, poison:.5, bug:.5, grass:.5, fairy:.5 },
+  ground:   { water:2, grass:2, ice:2, electric:0, poison:.5, rock:.5 },
+  flying:   { electric:2, ice:2, rock:2, fighting:.5, bug:.5, grass:.5, ground:0 },
+  psychic:  { bug:2, ghost:2, dark:2, fighting:.5, psychic:.5 },
+  bug:      { fire:2, flying:2, rock:2, fighting:.5, ground:.5, grass:.5 },
+  rock:     { water:2, grass:2, fighting:2, ground:2, steel:2, normal:.5, fire:.5, poison:.5, flying:.5 },
+  ghost:    { ghost:2, dark:2, normal:0, fighting:0, poison:.5, bug:.5 },
+  dragon:   { ice:2, dragon:2, fairy:2, fire:.5, water:.5, electric:.5, grass:.5 },
+  dark:     { fighting:2, bug:2, fairy:2, ghost:.5, dark:.5, psychic:0 },
+  steel:    { fire:2, fighting:2, ground:2, normal:.5, grass:.5, ice:.5, flying:.5, psychic:.5, bug:.5, rock:.5, dragon:.5, steel:.5, poison:0, fairy:.5 },
+  fairy:    { poison:2, steel:2, fighting:.5, bug:.5, dark:.5, dragon:0 }
+}
+const ALL_TYPES = ['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy']
+const TYPE_ABBR = {
+  normal:'NOR', fire:'FIR', water:'WAT', electric:'ELE', grass:'GRA', ice:'ICE',
+  fighting:'FIG', poison:'POI', ground:'GRO', flying:'FLY', psychic:'PSY', bug:'BUG',
+  rock:'ROC', ghost:'GHO', dragon:'DRA', dark:'DAR', steel:'STE', fairy:'FAI'
+}
+const TYPE_BG = {
+  normal:'#9EA0A5', fire:'#fd7d24', water:'#1E90FF', electric:'#ffbd00', grass:'#78C850',
+  ice:'#98D8D8', fighting:'#C03028', poison:'#A040A0', ground:'#E0C068', flying:'#A890F0',
+  psychic:'#F85888', bug:'#A8B820', rock:'#B8A038', ghost:'#705898', dragon:'#7038F8',
+  dark:'#705848', steel:'#B8B8D0', fairy:'#EE99AC'
+}
+
+/* ─── Helpers ─── */
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1)
+const pad = n => String(n).padStart(3, '0')
+const slug = s => s.replace(/-/g, ' ')
+
+function getPokemonId() {
+  return Number(new URLSearchParams(window.location.search).get("id"))
+}
+
+async function apiFetch(url) {
+  const r = await fetch(url)
+  return r.json()
+}
+
+/* ─── Type defense calc ─── */
+function calcDefenses(types) {
+  const eff = {}
+  ALL_TYPES.forEach(att => {
+    let mult = 1
+    types.forEach(def => {
+      const row = TYPE_CHART[att] || {}
+      mult *= (row[def] !== undefined ? row[def] : 1)
+    })
+    eff[att] = mult
+  })
+  return eff
+}
+
+/* ─── Evolution chain walker ─── */
+function walkChain(node, results = []) {
+  const evolvesTo = node.evolves_to || []
+  const trigger = node.evolution_details?.[0] || null
+  let method = null
+  if (trigger) {
+    if (trigger.trigger?.name === 'level-up' && trigger.min_level)
+      method = `Nv. ${trigger.min_level}`
+    else if (trigger.trigger?.name === 'trade')
+      method = trigger.held_item ? `Troca c/ ${slug(trigger.held_item.name)}` : 'Troca'
+    else if (trigger.trigger?.name === 'use-item' && trigger.item)
+      method = slug(trigger.item.name)
+    else if (trigger.trigger?.name === 'level-up' && trigger.min_happiness)
+      method = 'Amizade'
+    else if (trigger.trigger?.name === 'level-up' && trigger.min_beauty)
+      method = 'Beleza'
+    else if (trigger.trigger?.name === 'shed')
+      method = 'Evolução'
+    else
+      method = trigger.trigger?.name ? slug(trigger.trigger.name) : null
+  }
+  results.push({ speciesName: node.species.name, speciesUrl: node.species.url, method, evolvesTo })
+  evolvesTo.forEach(child => walkChain(child, results))
+  return results
+}
+
+/* Flatten chain into branches [[a,b,c], [a,d,e]] */
+function getEvoBranches(chain) {
+  function walk(node, path) {
+    const trigger = node.evolution_details?.[0] || null
+    let method = null
+    if (trigger) {
+      if (trigger.trigger?.name === 'level-up' && trigger.min_level)       method = `Nv. ${trigger.min_level}`
+      else if (trigger.trigger?.name === 'trade')                           method = trigger.held_item ? `Troca c/ ${slug(trigger.held_item.name)}` : 'Troca'
+      else if (trigger.trigger?.name === 'use-item' && trigger.item)        method = cap(slug(trigger.item.name))
+      else if (trigger.trigger?.name === 'level-up' && trigger.min_happiness) method = 'Amizade ♥'
+      else if (trigger.trigger?.name === 'level-up' && trigger.time_of_day)   method = `Amizade (${trigger.time_of_day})`
+      else if (trigger.trigger?.name === 'level-up' && trigger.min_level === null) method = 'Level up'
+      else if (trigger.trigger?.name)                                        method = cap(slug(trigger.trigger.name))
+    }
+    const current = { name: node.species.name, url: node.species.url, method }
+    const newPath = [...path, current]
+    if (node.evolves_to.length === 0) return [newPath]
+    return node.evolves_to.flatMap(child => walk(child, newPath))
+  }
+  return walk(chain, [])
+}
+
+/* ─── Render helpers ─── */
+function statBarWidth(v) { return Math.min(100, Math.round((v / 255) * 100)) }
+
+function renderTypeBadges(types) {
+  return types.map(t => `<span class="type type-${t}">${t}</span>`).join('')
+}
+
+/* ─── MOVES tab system ─── */
+let allMoves = []
+let currentTab = 'level-up'
+
+function renderMovesTab(tab) {
+  currentTab = tab
+  const filtered = tab === 'all'
+    ? allMoves
+    : allMoves.filter(m => m.method === tab)
+
+  const tabs = [
+    { id:'level-up', label:'Level Up' },
+    { id:'machine',  label:'TM / HM' },
+    { id:'egg',      label:'Ovo' },
+    { id:'tutor',    label:'Tutor' },
+    { id:'all',      label:'Todos' }
+  ]
+  const tabsHTML = tabs.map(t => `
+    <button class="tab-btn ${t.id === tab ? 'active' : ''}" onclick="renderMovesTab('${t.id}')">${t.label}</button>
+  `).join('')
+
+  const movesHTML = filtered.length
+    ? filtered.map(m => `<li class="move-pill">${slug(m.name)}</li>`).join('')
+    : `<li class="move-empty">Nenhum move nesta categoria.</li>`
+
+  document.querySelector('.moves-section').innerHTML = `
+    <p class="section-title">Moves (${filtered.length} de ${allMoves.length})</p>
+    <div class="tabs-row">${tabsHTML}</div>
+    <ul class="moves-grid">${movesHTML}</ul>
+  `
+}
+
+/* ─── Defenses table ─── */
+function renderDefenses(types) {
+  const eff = calcDefenses(types)
+  const cells = ALL_TYPES.map(att => {
+    const mult = eff[att]
+    let label = ''
+    if (mult === 0) label = '0'
+    else if (mult === 0.25) label = '¼'
+    else if (mult === 0.5) label = '½'
+    else if (mult === 2) label = '2'
+    else if (mult === 4) label = '4'
+    const cls = mult < 1 ? 'def-low' : mult > 1 ? 'def-high' : 'def-neutral'
+    const bg = TYPE_BG[att] || '#888'
+    return `
+      <div class="def-cell">
+        <div class="def-type-badge" style="background:${bg}">${TYPE_ABBR[att]}</div>
+        <div class="def-mult ${cls}">${label}</div>
+      </div>
+    `
+  }).join('')
+
+  return `
+    <div class="defenses-section">
+      <p class="section-title">Fraquezas & Resistências</p>
+      <p class="def-subtitle">Efetividade de cada tipo contra ${types.join(' / ')}</p>
+      <div class="def-grid">${cells}</div>
+    </div>
+  `
+}
+
+/* ─── Evolution chain render ─── */
+async function renderEvolutions(speciesUrl) {
+  const section = document.querySelector('.evo-section')
+  try {
+    const species = await apiFetch(speciesUrl)
+    const chainData = await apiFetch(species.evolution_chain.url)
+    const branches = getEvoBranches(chainData.chain)
+
+    // Fetch sprite for each unique pokemon in chain
+    const uniqueNames = [...new Set(branches.flat().map(s => s.name))]
+    const spriteMap = {}
+    await Promise.all(uniqueNames.map(async name => {
+      try {
+        const data = await apiFetch(`https://pokeapi.co/api/v2/pokemon/${name}`)
+        spriteMap[name] = {
+          sprite: data.sprites.front_default,
+          id: data.id,
+          types: data.types.map(t => t.type.name)
+        }
+      } catch(e) { spriteMap[name] = { sprite: null, id: null, types: [] } }
+    }))
+
+    // Build branches HTML
+    const branchesHTML = branches.map(branch => {
+      const stepsHTML = branch.map((poke, i) => {
+        const info = spriteMap[poke.name] || {}
+        const isActive = info.id === getPokemonId()
+        const arrow = i > 0 && poke.method
+          ? `<div class="evo-arrow"><span class="evo-method">${poke.method}</span><span class="evo-caret">→</span></div>`
+          : (i > 0 ? `<div class="evo-arrow"><span class="evo-caret">→</span></div>` : '')
+        return `
+          ${arrow}
+          <div class="evo-stage ${isActive ? 'evo-active' : ''}" onclick="if(${info.id}) location.href='pokemon.html?id=${info.id}'">
+            <img src="${info.sprite || ''}" alt="${poke.name}" class="evo-img"/>
+            <span class="evo-num">#${info.id ? pad(info.id) : '???'}</span>
+            <span class="evo-name">${cap(poke.name)}</span>
+            ${info.types ? `<div class="evo-types">${info.types.map(t => `<span class="evo-type-dot" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`).join('')}</div>` : ''}
+          </div>
+        `
+      }).join('')
+      return `<div class="evo-branch">${stepsHTML}</div>`
+    }).join('<div class="evo-divider"></div>')
+
+    section.innerHTML = `
+      <p class="section-title">Cadeia de Evolução</p>
+      <div class="evo-container">${branchesHTML}</div>
+    `
+  } catch(e) {
+    section.innerHTML = `<p class="section-title">Cadeia de Evolução</p><p class="def-subtitle">Não disponível.</p>`
+  }
+}
+
+/* ─── Abilities render ─── */
+async function renderAbilities(abilities) {
+  const section = document.querySelector('.abilities-section')
+  const items = await Promise.all(abilities.map(async a => {
+    const name = a.ability.name
+    const isHidden = a.is_hidden
+    let desc = ''
+    try {
+      const data = await apiFetch(a.ability.url)
+      const entry = data.flavor_text_entries?.find(e => e.language.name === 'en')
+      desc = entry ? entry.flavor_text.replace(/\n|\f/g, ' ') : ''
+    } catch(e) {}
+    return `
+      <div class="ability-card">
+        <div class="ability-header">
+          <span class="ability-name">${cap(slug(name))}</span>
+          ${isHidden ? '<span class="ability-hidden">Oculta</span>' : ''}
+        </div>
+        ${desc ? `<p class="ability-desc">${desc}</p>` : ''}
+      </div>
+    `
+  }))
+  section.innerHTML = `
+    <p class="section-title">Habilidades</p>
+    <div class="abilities-list">${items.join('')}</div>
+  `
+}
+
+/* ─── Main render ─── */
+async function renderPokemon(pokemon) {
+  const box = document.querySelector('[data-js="pokemon"]')
+  const types = pokemon.types.map(t => t.type.name)
+  const primaryType = types[0]
+  const accentColor = TYPE_COLORS[primaryType] || '#888'
+
+  box.style.setProperty('--type-accent', accentColor)
+
+  // Moves grouped by method
+  allMoves = pokemon.moves.map(m => ({
+    name: m.move.name,
+    method: m.version_group_details[0]?.move_learn_method?.name || 'other'
+  }))
+
+  const typeBadges = renderTypeBadges(types)
+  const statsHTML = pokemon.stats.map(item => {
+    const name = item.stat.name
+    const val = item.base_stat
+    const color = STAT_COLORS[name] || '#888'
+    const width = statBarWidth(val)
+    const label = STAT_LABELS[name] || name
+    return `
+      <li class="stat-row">
+        <span class="stat-name">${label}</span>
+        <span class="stat-value">${val}</span>
+        <div class="stat-bar-bg">
+          <div class="stat-bar-fill" style="width:${width}%; background:${color};"></div>
+        </div>
+      </li>
+    `
+  }).join('')
+
+  document.title = `${cap(pokemon.name)} — Pokédex`
+
+  // Sprite: prefer official artwork, fallback to front_default
+  const artworkUrl = pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default
+
+  // Weight / Height
+  const heightM = (pokemon.height / 10).toFixed(1)
+  const weightKg = (pokemon.weight / 10).toFixed(1)
+
+  box.innerHTML = `
+    <div class="top">
+      <img src="${artworkUrl}" alt="${pokemon.name}" class="pokemon-main-img"/>
+      <div class="top-info">
+        <p class="pokemon-number">#${pad(pokemon.id)}</p>
+        <h1>${cap(pokemon.name)}</h1>
+        <div class="types">${typeBadges}</div>
+        <div class="meta-row">
+          <div class="meta-item"><span class="meta-label">Altura</span><span class="meta-value">${heightM} m</span></div>
+          <div class="meta-item"><span class="meta-label">Peso</span><span class="meta-value">${weightKg} kg</span></div>
+          <div class="meta-item"><span class="meta-label">Base Exp</span><span class="meta-value">${pokemon.base_experience ?? '—'}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <p class="section-title">Base Stats</p>
+      <ul>${statsHTML}</ul>
+    </div>
+
+    <div class="abilities-section">
+      <p class="section-title">Habilidades</p>
+      <div class="abilities-list"><div class="loading-inline">carregando...</div></div>
+    </div>
+
+    <div class="moves-section">
+      <p class="section-title">Moves</p>
+      <div class="loading-inline">carregando...</div>
+    </div>
+
+    <div class="evo-section">
+      <p class="section-title">Cadeia de Evolução</p>
+      <div class="loading-inline">carregando...</div>
+    </div>
+
+    ${renderDefenses(types)}
+  `
+
+  // Load async sections in parallel
+  const speciesUrl = `https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`
+  renderMovesTab('level-up')
+  await Promise.all([
+    renderAbilities(pokemon.abilities),
+    renderEvolutions(speciesUrl)
+  ])
+}
+
+async function main() {
+  const id = getPokemonId()
+  const pokemon = await apiFetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+  await renderPokemon(pokemon)
+}
+
+main()
+</script>
+</body>
+</html>
