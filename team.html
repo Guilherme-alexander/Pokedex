@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/shared.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>Montar Time — Pokédex</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--text-primary);min-height:100vh}
+.page-wrap{max-width:1200px;margin:0 auto;padding:36px 32px 80px}
+.page-title{font-family:'Exo 2',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-1px;margin-bottom:8px}
+.page-title span{color:var(--accent)}
+.page-sub{font-size:14px;color:var(--text-muted);margin-bottom:32px}
+
+/* Team slots grid */
+.team-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:32px}
+.team-slot{
+  background:var(--bg-card);border:2px dashed var(--border);
+  border-radius:var(--radius);padding:16px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  min-height:180px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+  position:relative;
+}
+.team-slot:hover{border-color:var(--border-mid)}
+.team-slot.filled{border-style:solid;border-color:var(--border);cursor:default}
+.team-slot.filled:hover{background:var(--bg-inner)}
+.slot-empty-icon{font-size:28px;opacity:.25;margin-top:auto}
+.slot-empty-label{font-size:11px;color:var(--text-dim);margin-bottom:auto}
+.slot-img{width:80px;height:80px;image-rendering:pixelated;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+.slot-num{font-size:10px;color:var(--text-muted);letter-spacing:1px}
+.slot-name{font-family:'Exo 2',sans-serif;font-size:13px;font-weight:700;text-transform:capitalize;text-align:center}
+.slot-types{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.slot-remove{
+  position:absolute;top:6px;right:6px;
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(234,59,59,.2);border:1px solid rgba(234,59,59,.3);
+  color:#ea3b3b;font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;line-height:1;
+}
+.slot-remove:hover{background:rgba(234,59,59,.4)}
+.slot-moves-btn{
+  font-size:10px;font-weight:600;color:var(--text-muted);
+  background:var(--bg-inner);border:1px solid var(--border);
+  border-radius:4px;padding:3px 8px;cursor:pointer;
+  transition:color .15s,border-color .15s;
+}
+.slot-moves-btn:hover{color:var(--accent);border-color:var(--accent-border)}
+
+/* Add Pokemon modal */
+.add-modal{
+  background:var(--bg-card);border-radius:20px;border:1px solid var(--border-mid);
+  max-width:500px;width:100%;padding:28px;position:relative;
+  max-height:80vh;display:flex;flex-direction:column;gap:16px;
+}
+.add-search-wrap{position:relative}
+.add-search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#555;pointer-events:none}
+.add-search{
+  width:100%;height:44px;padding:0 16px 0 40px;
+  background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;
+  color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s;
+}
+.add-search:focus{border-color:var(--accent-border)}
+.add-results{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;max-height:360px}
+.add-result{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;
+  background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;
+  cursor:pointer;transition:border-color .15s,background .15s;
+}
+.add-result:hover{background:rgba(255,255,255,.04);border-color:var(--accent-border)}
+.add-result img{width:48px;height:48px;image-rendering:pixelated}
+.add-result-info{flex:1}
+.add-result-name{font-weight:700;text-transform:capitalize;font-size:14px}
+.add-result-num{font-size:11px;color:var(--text-muted)}
+
+/* Moveset modal */
+.moveset-modal{
+  background:var(--bg-card);border-radius:20px;border:1px solid var(--border-mid);
+  max-width:560px;width:100%;padding:28px;position:relative;
+  max-height:85vh;overflow-y:auto;
+}
+.move-slot-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.move-slot-num{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--bg-inner);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--text-muted);flex-shrink:0;
+}
+.move-slot-select{
+  flex:1;height:38px;padding:0 12px;
+  background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;
+  color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:13px;
+  outline:none;cursor:pointer;transition:border-color .2s;
+}
+.move-slot-select:focus{border-color:var(--accent-border)}
+.move-slot-select option{background:var(--bg-inner)}
+
+/* ── Analysis ── */
+.analysis-wrap{display:flex;flex-direction:column;gap:16px}
+.analysis-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.analysis-title{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);
+}
+.analysis-body{padding:20px}
+
+/* Team type coverage */
+.type-coverage-grid{display:flex;flex-wrap:wrap;gap:8px}
+.coverage-item{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:6px;
+  background:var(--bg-inner);border:1px solid var(--border);font-size:12px;font-weight:600;
+}
+.coverage-count{
+  min-width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;background:var(--bg);
+}
+
+/* Threat/strength analysis */
+.threat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.threat-col h4{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.threat-col.weaknesses h4{color:#ff5959}
+.threat-col.strengths h4{color:#9bcc50}
+.threat-list{display:flex;flex-direction:column;gap:6px}
+.threat-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 12px;background:var(--bg-inner);border-radius:6px;
+  border:1px solid var(--border);
+}
+.threat-type-label{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  padding:2px 8px;border-radius:20px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.threat-count-badge{
+  font-size:11px;font-weight:800;
+  padding:2px 8px;border-radius:20px;
+  background:rgba(234,59,59,.15);color:#ff5959;border:1px solid rgba(234,59,59,.3);
+}
+.threat-item.strength .threat-count-badge{
+  background:rgba(155,204,80,.15);color:#9bcc50;border-color:rgba(155,204,80,.3);
+}
+
+/* Total stats */
+.team-stats-compare{display:flex;flex-direction:column;gap:10px}
+.team-stat-row{display:flex;align-items:center;gap:12px}
+.team-stat-label{min-width:100px;font-size:12px;color:var(--text-muted);font-weight:500}
+.team-stat-value{min-width:36px;font-size:13px;font-weight:700;text-align:right}
+.team-stat-avg{font-size:11px;color:var(--text-dim);min-width:60px}
+.team-bar-bg{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.team-bar-fill{height:100%;border-radius:99px;transition:width .8s}
+
+/* Grade badges */
+.grade-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 16px;border-radius:8px;
+  background:var(--bg-inner);border:1px solid var(--border);
+  font-size:13px;font-weight:600;margin-bottom:10px;
+}
+.grade-letter{
+  font-family:'Exo 2',sans-serif;font-size:28px;font-weight:900;
+  min-width:36px;text-align:center;
+}
+
+@media(max-width:760px){
+  .page-wrap{padding:20px 14px 60px}
+  .team-grid{grid-template-columns:repeat(3,1fr)}
+  .threat-grid{grid-template-columns:1fr}
+}
+@media(max-width:420px){
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="header-logo">Poké<span>dex</span></a>
+  <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
+    </a>
+    <a href="moves.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
+    </a>
+    <a href="compare.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
+    </a>
+    <a href="team.html" class="nav-link active">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
+    </a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <h1 class="page-title">Montar <span>Time</span></h1>
+  <p class="page-sub">Escolha até 6 Pokémons e defina o moveset de cada um para ver a análise do time.</p>
+
+  <div class="team-grid" id="team-grid"></div>
+
+  <div id="analysis-wrap"></div>
+</div>
+
+<!-- Add Pokemon Modal -->
+<div id="add-modal" style="display:none">
+  <div class="modal-backdrop" onclick="if(event.target===this)closeAddModal()">
+    <div class="add-modal">
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+      <h2 style="font-family:'Exo 2',sans-serif;font-size:1.3rem;font-weight:900;margin-bottom:4px">Adicionar Pokémon</h2>
+      <div class="add-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="add-search" id="add-search" placeholder="Nome ou #número..." oninput="filterAddSearch(this.value)" autocomplete="off"/>
+      </div>
+      <div class="add-results" id="add-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Moveset Modal -->
+<div id="moveset-modal" style="display:none">
+  <div class="modal-backdrop" onclick="if(event.target===this)closeMovesetModal()">
+    <div class="moveset-modal">
+      <button class="modal-close" onclick="closeMovesetModal()">✕</button>
+      <div id="moveset-modal-content"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/shared.js"></script>
+<script>
+let pokemonList = []
+let team = Array(6).fill(null)  // [{data, moves:[null,null,null,null]}]
+let addingSlot = -1
+
+const STAT_ORDER = ['hp','attack','defense','special-attack','special-defense','speed']
+
+/* ── Init ── */
+async function init() {
+  const data = await apiFetch('https://pokeapi.co/api/v2/pokemon?limit=800')
+  pokemonList = data.results.map((p,i)=>({name:p.name,id:i+1}))
+  renderGrid()
+}
+
+/* ── Team Grid ── */
+function renderGrid() {
+  const grid = document.getElementById('team-grid')
+  grid.innerHTML = Array(6).fill(0).map((_,i) => {
+    const slot = team[i]
+    if (!slot) return `
+      <div class="team-slot" onclick="openAddModal(${i})">
+        <span class="slot-empty-icon">＋</span>
+        <span class="slot-empty-label">Slot ${i+1}</span>
+      </div>`
+    const p = slot.data
+    const types = p.types.map(t=>t.type.name)
+    const artwork = p.sprites.front_default
+    const movesLabel = slot.moves.filter(Boolean).length
+    return `
+      <div class="team-slot filled">
+        <button class="slot-remove" onclick="removeSlot(${i})">✕</button>
+        <img src="${artwork}" alt="${p.name}" class="slot-img"/>
+        <span class="slot-num">#${pad(p.id)}</span>
+        <span class="slot-name">${cap(p.name)}</span>
+        <div class="slot-types">${renderTypeBadges(types)}</div>
+        <button class="slot-moves-btn" onclick="openMovesetModal(${i})">
+          ${movesLabel ? `${movesLabel}/4 moves` : 'Definir moves'}
+        </button>
+      </div>`
+  }).join('')
+
+  renderAnalysis()
+}
+
+function removeSlot(i) { team[i]=null; renderGrid() }
+
+/* ── Add Modal ── */
+function openAddModal(slot) {
+  addingSlot = slot
+  document.getElementById('add-modal').style.display = 'block'
+  document.getElementById('add-search').value = ''
+  filterAddSearch('')
+  setTimeout(()=>document.getElementById('add-search').focus(), 100)
+}
+function closeAddModal() { document.getElementById('add-modal').style.display='none' }
+
+function filterAddSearch(q) {
+  const lower = q.toLowerCase().trim()
+  const results = lower
+    ? pokemonList.filter(p=>p.name.includes(lower)||String(p.id).includes(lower.replace('#',''))).slice(0,12)
+    : pokemonList.slice(0,12)
+  const el = document.getElementById('add-results')
+  el.innerHTML = results.map(p=>`
+    <div class="add-result" onclick="addToTeam(${p.id})">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}"/>
+      <div class="add-result-info">
+        <div class="add-result-name">${p.name}</div>
+        <div class="add-result-num">#${pad(p.id)}</div>
+      </div>
+    </div>`).join('')
+}
+
+async function addToTeam(id) {
+  closeAddModal()
+  const data = await apiFetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+  team[addingSlot] = { data, moves: [null,null,null,null] }
+  renderGrid()
+}
+
+/* ── Moveset Modal ── */
+let movesetSlot = -1
+function openMovesetModal(i) {
+  movesetSlot = i
+  const slot = team[i]
+  if (!slot) return
+  const p = slot.data
+  const moveOptions = p.moves.map(m=>`<option value="${m.move.name}">${cap(slug(m.move.name))}</option>`).join('')
+  const content = document.getElementById('moveset-modal-content')
+  content.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <img src="${p.sprites.front_default}" style="width:64px;height:64px;image-rendering:pixelated"/>
+      <div>
+        <div style="font-family:'Exo 2',sans-serif;font-size:1.2rem;font-weight:900;text-transform:capitalize">${p.name}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${p.moves.length} moves disponíveis</div>
+      </div>
+    </div>
+    <p class="section-title">Escolha até 4 Moves</p>
+    ${[0,1,2,3].map(n=>`
+      <div class="move-slot-row">
+        <div class="move-slot-num">${n+1}</div>
+        <select class="move-slot-select" id="move-slot-${n}" onchange="saveMoveSlot()">
+          <option value="">— Nenhum —</option>
+          ${moveOptions}
+        </select>
+      </div>`).join('')}
+    <button class="btn-accent" onclick="closeMovesetModal()" style="margin-top:16px;width:100%">Salvar Moveset</button>
+  `
+  // Restore existing selections
+  slot.moves.forEach((mv,n)=>{
+    if(mv) document.getElementById(`move-slot-${n}`).value = mv
+  })
+  document.getElementById('moveset-modal').style.display = 'block'
+}
+function closeMovesetModal() {
+  saveMoveSlot()
+  document.getElementById('moveset-modal').style.display='none'
+  renderGrid()
+}
+function saveMoveSlot() {
+  if (movesetSlot < 0 || !team[movesetSlot]) return
+  team[movesetSlot].moves = [0,1,2,3].map(n=>document.getElementById(`move-slot-${n}`)?.value||null)
+}
+
+/* ── Analysis ── */
+function renderAnalysis() {
+  const filled = team.filter(Boolean)
+  const wrap = document.getElementById('analysis-wrap')
+  if (filled.length < 2) { wrap.innerHTML=''; return }
+
+  // Aggregate types
+  const allTypes = filled.flatMap(s=>s.data.types.map(t=>t.type.name))
+  const typeCoverage = {}
+  allTypes.forEach(t=>{ typeCoverage[t]=(typeCoverage[t]||0)+1 })
+
+  // Defense vulnerabilities
+  const vulnCount = {}, resCount = {}
+  filled.forEach(slot => {
+    const types = slot.data.types.map(t=>t.type.name)
+    const eff = calcDefenses(types)
+    ALL_TYPES.forEach(att => {
+      if (eff[att] > 1) vulnCount[att] = (vulnCount[att]||0)+1
+      if (eff[att] < 1 && eff[att] > 0) resCount[att] = (resCount[att]||0)+1
+    })
+  })
+
+  const topVulns = Object.entries(vulnCount).sort((a,b)=>b[1]-a[1]).slice(0,6)
+  const topRes = Object.entries(resCount).sort((a,b)=>b[1]-a[1]).slice(0,6)
+
+  // Total stats
+  const statTotals = {}
+  STAT_ORDER.forEach(s=>statTotals[s]=0)
+  filled.forEach(slot=>{
+    slot.data.stats.forEach(s=>{
+      if(statTotals[s.stat.name]!==undefined) statTotals[s.stat.name]+=s.base_stat
+    })
+  })
+
+  // Grade
+  const totalBST = Object.values(statTotals).reduce((a,v)=>a+v,0)
+  const avgBST = filled.length > 0 ? totalBST / filled.length : 0
+  const typeVariety = new Set(allTypes).size
+  const maxVuln = topVulns.length ? topVulns[0][1] : 0
+  let grade='C', gradeColor='#f5ac78', gradeMsg=''
+  if (avgBST>=500&&typeVariety>=5&&maxVuln<=2) { grade='S'; gradeColor='var(--accent)'; gradeMsg='Time excepcional! Boa cobertura de tipos e stats altos.' }
+  else if (avgBST>=450&&typeVariety>=4&&maxVuln<=3) { grade='A'; gradeColor='#9bcc50'; gradeMsg='Time forte com boa diversidade.' }
+  else if (avgBST>=400&&typeVariety>=3) { grade='B'; gradeColor='#9db7f5'; gradeMsg='Time equilibrado, mas pode melhorar a cobertura.' }
+  else if (maxVuln>=4) { grade='D'; gradeColor='#ff5959'; gradeMsg='Atenção: muitas fraquezas ao mesmo tipo!' }
+  else { grade='C'; gradeColor='#f5ac78'; gradeMsg='Time mediano. Tente variar mais os tipos.' }
+
+  // Coverage bar HTML
+  const coverageHTML = Object.entries(typeCoverage).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`
+    <div class="coverage-item">
+      <span style="width:8px;height:8px;border-radius:50%;background:${TYPE_COLORS[t]||'#888'};display:inline-block"></span>
+      <span style="text-transform:capitalize;color:var(--text-muted)">${t}</span>
+      <span class="coverage-count" style="background:${TYPE_COLORS[t]||'#888'}20;color:${TYPE_COLORS[t]||'#888'}">${n}</span>
+    </div>`).join('')
+
+  // Threat items
+  const vulnHTML = topVulns.map(([t,n])=>`
+    <div class="threat-item">
+      <span class="threat-type-label" style="background:${TYPE_BG[t]||'#888'}">${TYPE_ABBR[t]||t}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${n} fraco${n>1?'s':''}</span>
+      <span class="threat-count-badge">×${n}</span>
+    </div>`).join('')
+  const resHTML = topRes.map(([t,n])=>`
+    <div class="threat-item strength">
+      <span class="threat-type-label" style="background:${TYPE_BG[t]||'#888'}">${TYPE_ABBR[t]||t}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${n} resist${n>1?'em':'e'}</span>
+      <span class="threat-count-badge">${n}×</span>
+    </div>`).join('')
+
+  // Team stats bars
+  const maxPossible = filled.length * 255
+  const statsHTML = STAT_ORDER.map(s=>{
+    const total = statTotals[s]
+    const avg = filled.length ? Math.round(total/filled.length) : 0
+    const pct = Math.min(100, Math.round(total/maxPossible*100))
+    return `<div class="team-stat-row">
+      <span class="team-stat-label">${STAT_LABELS[s]||s}</span>
+      <span class="team-stat-value">${total}</span>
+      <span class="team-stat-avg">média ${avg}</span>
+      <div class="team-bar-bg"><div class="team-bar-fill" style="width:${pct}%;background:${STAT_COLORS[s]||'#888'}"></div></div>
+    </div>`
+  }).join('')
+
+  // Moveset summary
+  const movesetSummary = filled.map(s=>{
+    const p = s.data
+    const moves = s.moves.filter(Boolean)
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <img src="${p.sprites.front_default}" style="width:44px;height:44px;image-rendering:pixelated"/>
+      <div>
+        <div style="font-size:13px;font-weight:700;text-transform:capitalize">${p.name}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px">
+          ${moves.length
+            ? moves.map(m=>`<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--bg-inner);border:1px solid var(--border);color:var(--text-muted)">${slug(m)}</span>`).join('')
+            : '<span style="font-size:11px;color:var(--text-dim)">Sem moves definidos</span>'}
+        </div>
+      </div>
+    </div>`
+  }).join('')
+
+  wrap.innerHTML = `
+    <div class="analysis-wrap">
+      <div class="analysis-card">
+        <div class="analysis-title">🏆 Avaliação do Time</div>
+        <div class="analysis-body">
+          <div class="grade-badge">
+            <span class="grade-letter" style="color:${gradeColor}">${grade}</span>
+            <div>
+              <div style="font-size:14px;font-weight:700">Nota do Time</div>
+              <div style="font-size:12px;color:var(--text-muted)">${gradeMsg}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+            <div class="grade-badge" style="gap:6px">
+              <span style="font-size:18px;font-weight:900;color:var(--text-primary)">${typeVariety}</span>
+              <span style="font-size:12px;color:var(--text-muted)">tipos únicos</span>
+            </div>
+            <div class="grade-badge" style="gap:6px">
+              <span style="font-size:18px;font-weight:900;color:var(--text-primary)">${Math.round(avgBST)}</span>
+              <span style="font-size:12px;color:var(--text-muted)">BST médio</span>
+            </div>
+            <div class="grade-badge" style="gap:6px">
+              <span style="font-size:18px;font-weight:900;color:${maxVuln>=4?'#ff5959':'var(--text-primary)'}">${maxVuln}</span>
+              <span style="font-size:12px;color:var(--text-muted)">maior fraqueza</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">🎯 Cobertura de Tipos do Time</div>
+        <div class="analysis-body">
+          <div class="type-coverage-grid">${coverageHTML}</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">⚠️ Ameaças & Resistências</div>
+        <div class="analysis-body">
+          <div class="threat-grid">
+            <div class="threat-col weaknesses">
+              <h4>🔴 Maiores Fraquezas</h4>
+              <div class="threat-list">${vulnHTML || '<p style="color:var(--text-dim);font-size:13px">Nenhuma fraqueza crítica!</p>'}</div>
+            </div>
+            <div class="threat-col strengths">
+              <h4>🟢 Maiores Resistências</h4>
+              <div class="threat-list">${resHTML || '<p style="color:var(--text-dim);font-size:13px">Nenhuma resistência coletiva.</p>'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">📊 Stats Totais do Time</div>
+        <div class="analysis-body">
+          <div class="team-stats-compare">${statsHTML}</div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <div class="analysis-title">⚡ Movesets</div>
+        <div class="analysis-body">${movesetSummary}</div>
+      </div>
+    </div>`
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { closeAddModal(); closeMovesetModal() }
+})
+
+init()
+</script>
+</body>
+</html>

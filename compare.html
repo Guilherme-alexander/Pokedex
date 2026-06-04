@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/shared.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>Comparar — Pokédex</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--text-primary);min-height:100vh}
+.page-wrap{max-width:1200px;margin:0 auto;padding:36px 32px 80px}
+.page-title{font-family:'Exo 2',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-1px;margin-bottom:32px}
+.page-title span{color:var(--accent)}
+
+/* Pickers */
+.pickers{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px}
+.picker-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+}
+.picker-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+.picker-input-wrap{position:relative}
+.picker-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#555;pointer-events:none}
+.picker-input{
+  width:100%;height:44px;padding:0 44px 0 40px;
+  background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;
+  color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s;
+}
+.picker-input:focus{border-color:var(--accent-border)}
+.picker-suggestions{
+  position:absolute;left:0;right:0;top:48px;
+  background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;
+  max-height:220px;overflow-y:auto;z-index:50;
+  display:none;
+}
+.picker-suggestion{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;cursor:pointer;transition:background .1s;
+}
+.picker-suggestion:hover{background:rgba(255,255,255,.06)}
+.picker-suggestion img{width:36px;height:36px;image-rendering:pixelated}
+.picker-suggestion-name{font-size:13px;font-weight:500;text-transform:capitalize}
+.picker-suggestion-num{font-size:11px;color:var(--text-muted)}
+
+.selected-pokemon{
+  margin-top:16px;display:flex;align-items:center;gap:14px;
+  padding:14px;background:var(--bg-inner);border-radius:8px;
+  border:1px solid var(--border);
+}
+.selected-pokemon img{width:72px;height:72px;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.selected-info h3{font-family:'Exo 2',sans-serif;font-size:1.1rem;font-weight:700;text-transform:capitalize;margin-bottom:6px}
+.selected-info .types{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Compare table */
+.compare-section{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:20px;
+}
+.compare-section-title{
+  padding:16px 24px;border-bottom:1px solid var(--border);
+  font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);
+}
+.compare-body{padding:20px 24px}
+
+/* Stat compare rows */
+.stat-compare-row{
+  display:grid;grid-template-columns:1fr 110px 1fr;
+  align-items:center;gap:12px;margin-bottom:14px;
+}
+.stat-compare-row:last-child{margin-bottom:0}
+.bar-left,.bar-right{display:flex;align-items:center;gap:8px}
+.bar-right{flex-direction:row-reverse}
+.stat-num{font-size:13px;font-weight:800;color:var(--text-primary);min-width:30px}
+.bar-left .stat-num{text-align:left}
+.bar-right .stat-num{text-align:right}
+.stat-name-center{text-align:center;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}
+.mini-bar-bg{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.bar-left .mini-bar-fill{margin-left:auto}
+.winner-left .bar-left .mini-bar-fill{filter:brightness(1.2)}
+.winner-right .bar-right .mini-bar-fill{filter:brightness(1.2)}
+
+/* Total row */
+.stat-total-row{
+  display:grid;grid-template-columns:1fr 110px 1fr;
+  align-items:center;gap:12px;
+  padding-top:14px;margin-top:4px;border-top:1px solid var(--border);
+}
+.total-num{font-size:20px;font-weight:900;text-align:center}
+.total-left{text-align:right}
+.total-right{text-align:left}
+.total-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);text-align:center}
+
+/* Moves compare */
+.moves-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.moves-col h4{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;text-transform:capitalize}
+.moves-col-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+.move-compare-chip{
+  padding:6px 12px;background:var(--bg-inner);border:1px solid var(--border);
+  border-radius:6px;font-size:12px;font-weight:500;text-transform:capitalize;
+  color:var(--text-muted);
+}
+.move-shared{border-color:rgba(232,255,71,.3);color:var(--accent)}
+
+/* Defenses compare */
+.def-compare{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.def-col h4{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;text-transform:capitalize}
+
+/* Empty state */
+.compare-empty{
+  padding:48px;text-align:center;color:var(--text-dim);font-size:14px;
+}
+.compare-placeholder{
+  opacity:.5;font-size:40px;margin-bottom:12px;
+}
+
+@media(max-width:640px){
+  .page-wrap{padding:20px 16px 60px}
+  .pickers{grid-template-columns:1fr}
+  .stat-compare-row{grid-template-columns:1fr 80px 1fr}
+  .moves-compare,.def-compare{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="header-logo">Poké<span>dex</span></a>
+  <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
+    </a>
+    <a href="moves.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
+    </a>
+    <a href="compare.html" class="nav-link active">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
+    </a>
+    <a href="team.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
+    </a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <h1 class="page-title">Compa<span>rar</span></h1>
+
+  <div class="pickers">
+    <div class="picker-card">
+      <div class="picker-label">Pokémon A</div>
+      <div class="picker-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="picker-input" id="picker-a" placeholder="Nome ou #número..." oninput="onPickerInput('a',this.value)" autocomplete="off"/>
+        <div class="picker-suggestions" id="suggestions-a"></div>
+      </div>
+      <div id="selected-a" class="selected-pokemon" style="display:none"></div>
+    </div>
+    <div class="picker-card">
+      <div class="picker-label">Pokémon B</div>
+      <div class="picker-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="picker-input" id="picker-b" placeholder="Nome ou #número..." oninput="onPickerInput('b',this.value)" autocomplete="off"/>
+        <div class="picker-suggestions" id="suggestions-b"></div>
+      </div>
+      <div id="selected-b" class="selected-pokemon" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="compare-result">
+    <div class="compare-empty">
+      <div class="compare-placeholder">⚔️</div>
+      Escolha dois Pokémons acima para comparar
+    </div>
+  </div>
+</div>
+
+<script src="js/shared.js"></script>
+<script>
+let pokemonList = []
+let selected = { a: null, b: null }
+let searchTimer = {}
+
+async function loadList() {
+  const data = await apiFetch('https://pokeapi.co/api/v2/pokemon?limit=800')
+  pokemonList = data.results.map((p,i)=>({name:p.name, id:i+1}))
+}
+
+function onPickerInput(side, val) {
+  clearTimeout(searchTimer[side])
+  const q = val.toLowerCase().trim()
+  if (!q) { hideSuggestions(side); return }
+  searchTimer[side] = setTimeout(() => showSuggestions(side, q), 200)
+}
+
+function showSuggestions(side, q) {
+  const results = pokemonList
+    .filter(p => p.name.includes(q) || String(p.id).includes(q.replace('#','')))
+    .slice(0, 8)
+  const el = document.getElementById(`suggestions-${side}`)
+  if (!results.length) { el.style.display='none'; return }
+  el.style.display = 'block'
+  el.innerHTML = results.map(p => `
+    <div class="picker-suggestion" onclick="selectPokemon('${side}','${p.name}',${p.id})">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}"/>
+      <span class="picker-suggestion-name">${p.name}</span>
+      <span class="picker-suggestion-num">#${pad(p.id)}</span>
+    </div>`).join('')
+}
+
+function hideSuggestions(side) {
+  document.getElementById(`suggestions-${side}`).style.display='none'
+}
+
+async function selectPokemon(side, name, id) {
+  hideSuggestions(side)
+  document.getElementById(`picker-${side}`).value = name
+  const data = await apiFetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+  selected[side] = data
+  renderSelectedBadge(side, data)
+  if (selected.a && selected.b) renderComparison()
+}
+
+function renderSelectedBadge(side, p) {
+  const el = document.getElementById(`selected-${side}`)
+  const types = p.types.map(t=>t.type.name)
+  const artwork = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default
+  el.style.display = 'flex'
+  el.innerHTML = `
+    <img src="${artwork}" alt="${p.name}"/>
+    <div class="selected-info">
+      <h3>${cap(p.name)} <span style="color:var(--text-muted);font-size:13px">#${pad(p.id)}</span></h3>
+      <div class="types">${renderTypeBadges(types)}</div>
+    </div>`
+}
+
+function renderComparison() {
+  const a = selected.a, b = selected.b
+  const result = document.getElementById('compare-result')
+
+  const STAT_ORDER = ['hp','attack','defense','special-attack','special-defense','speed']
+  const aStats = Object.fromEntries(a.stats.map(s=>[s.stat.name, s.base_stat]))
+  const bStats = Object.fromEntries(b.stats.map(s=>[s.stat.name, s.base_stat]))
+  const aTotal = Object.values(aStats).reduce((s,v)=>s+v,0)
+  const bTotal = Object.values(bStats).reduce((s,v)=>s+v,0)
+
+  const statsHTML = STAT_ORDER.map(stat => {
+    const av = aStats[stat]||0, bv = bStats[stat]||0
+    const max = Math.max(av, bv, 1)
+    const aW = Math.round(av/255*100), bW = Math.round(bv/255*100)
+    const aColor = STAT_COLORS[stat]||'#888', bColor = STAT_COLORS[stat]||'#888'
+    const winner = av>bv?'winner-left':bv>av?'winner-right':''
+    return `<div class="stat-compare-row ${winner}">
+      <div class="bar-left">
+        <span class="stat-num">${av}</span>
+        <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${aW}%;background:${aColor};float:right"></div></div>
+      </div>
+      <div class="stat-name-center">${STAT_LABELS[stat]||stat}</div>
+      <div class="bar-right">
+        <span class="stat-num">${bv}</span>
+        <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${bW}%;background:${bColor}"></div></div>
+      </div>
+    </div>`
+  }).join('')
+
+  // Moves
+  const aMoves = new Set(a.moves.map(m=>m.move.name))
+  const bMoves = new Set(b.moves.map(m=>m.move.name))
+  const shared = [...aMoves].filter(m=>bMoves.has(m))
+  const aOnly = [...aMoves].filter(m=>!bMoves.has(m)).slice(0,30)
+  const bOnly = [...bMoves].filter(m=>!aMoves.has(m)).slice(0,30)
+
+  const movesHTML = `<div class="moves-compare">
+    <div class="moves-col">
+      <h4>${cap(a.name)} (${aMoves.size} moves)</h4>
+      <div class="moves-col-list">
+        ${shared.map(m=>`<div class="move-compare-chip move-shared">⚡ ${slug(m)}</div>`).join('')}
+        ${aOnly.map(m=>`<div class="move-compare-chip">${slug(m)}</div>`).join('')}
+      </div>
+    </div>
+    <div class="moves-col">
+      <h4>${cap(b.name)} (${bMoves.size} moves)</h4>
+      <div class="moves-col-list">
+        ${shared.map(m=>`<div class="move-compare-chip move-shared">⚡ ${slug(m)}</div>`).join('')}
+        ${bOnly.map(m=>`<div class="move-compare-chip">${slug(m)}</div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--text-muted);margin-top:10px">⚡ Marcados em amarelo = moves em comum (${shared.length})</p>`
+
+  // Defenses
+  const aTypes = a.types.map(t=>t.type.name)
+  const bTypes = b.types.map(t=>t.type.name)
+  const defHTML = `<div class="def-compare">
+    <div class="def-col"><h4>${cap(a.name)}</h4><div class="def-grid">${renderDefGrid(aTypes)}</div></div>
+    <div class="def-col"><h4>${cap(b.name)}</h4><div class="def-grid">${renderDefGrid(bTypes)}</div></div>
+  </div>`
+
+  result.innerHTML = `
+    <div class="compare-section">
+      <div class="compare-section-title">⚔️ Base Stats</div>
+      <div class="compare-body">
+        ${statsHTML}
+        <div class="stat-total-row">
+          <div class="total-left"><div class="total-num" style="color:${aTotal>bTotal?'var(--accent)':'var(--text-primary)'}">${aTotal}</div><div class="total-label">${cap(a.name)}</div></div>
+          <div style="text-align:center;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Total</div>
+          <div class="total-right"><div class="total-num" style="color:${bTotal>aTotal?'var(--accent)':'var(--text-primary)'}">${bTotal}</div><div class="total-label">${cap(b.name)}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="compare-section">
+      <div class="compare-section-title">🎯 Moves</div>
+      <div class="compare-body">${movesHTML}</div>
+    </div>
+    <div class="compare-section">
+      <div class="compare-section-title">🛡️ Fraquezas & Resistências</div>
+      <div class="compare-body">${defHTML}</div>
+    </div>`
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.picker-input-wrap')) {
+    hideSuggestions('a'); hideSuggestions('b')
+  }
+})
+
+loadList()
+</script>
+</body>
+</html>

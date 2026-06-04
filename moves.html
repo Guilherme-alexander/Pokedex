@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/shared.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>Moves — Pokédex</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--text-primary);min-height:100vh}
+
+.page-wrap{max-width:1400px;margin:0 auto;padding:36px 32px 80px}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px}
+.page-title{font-family:'Exo 2',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-1px}
+.page-title span{color:var(--accent)}
+
+/* ── Controls ── */
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px;align-items:center}
+.search-box-moves{
+  position:relative;flex:1;min-width:200px;max-width:360px;
+}
+.search-box-moves svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#555;pointer-events:none}
+.search-box-moves input{
+  width:100%;height:42px;padding:0 16px 0 42px;
+  background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;
+  color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s;
+}
+.search-box-moves input:focus{border-color:var(--accent-border)}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px}
+.filter-btn{
+  height:34px;padding:0 12px;border-radius:20px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-family:'Space Grotesk',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.filter-btn:hover{background:rgba(255,255,255,.05);color:var(--text-primary)}
+.filter-btn.active{background:var(--accent-faint);color:var(--accent);border-color:var(--accent-border)}
+
+/* ── Stats bar ── */
+.moves-stats-bar{
+  display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;
+}
+.stat-pill{
+  padding:6px 14px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:8px;font-size:12px;font-weight:600;color:var(--text-muted);
+}
+.stat-pill strong{color:var(--text-primary);margin-left:4px}
+
+/* ── Grid ── */
+.moves-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:12px;
+}
+.move-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  cursor:pointer;
+  transition:transform .15s,background .15s,border-color .15s;
+  display:flex;flex-direction:column;gap:10px;
+  position:relative;overflow:hidden;
+}
+.move-card::before{
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:70px;height:70px;border-radius:50%;
+  background:var(--mc,#888);opacity:.06;pointer-events:none;
+}
+.move-card:hover{
+  transform:translateY(-3px);background:var(--bg-inner);border-color:var(--border-mid);
+}
+.move-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.move-name{font-family:'Exo 2',sans-serif;font-size:15px;font-weight:700;text-transform:capitalize;color:var(--text-primary)}
+.move-type-badge{
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+  padding:3px 9px;border-radius:20px;color:#fff;flex-shrink:0;
+  text-shadow:0 1px 2px rgba(0,0,0,.4);
+}
+.move-meta{display:flex;gap:12px;flex-wrap:wrap}
+.move-meta-item{display:flex;flex-direction:column;gap:1px}
+.move-meta-label{font-size:10px;color:var(--text-dim);letter-spacing:.5px;text-transform:uppercase}
+.move-meta-value{font-size:13px;font-weight:700;color:var(--text-primary)}
+.move-class-badge{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  padding:2px 8px;border-radius:4px;
+}
+.move-class-physical{background:rgba(245,172,120,.15);color:#f5ac78;border:1px solid rgba(245,172,120,.3)}
+.move-class-special{background:rgba(157,183,245,.15);color:#9db7f5;border:1px solid rgba(157,183,245,.3)}
+.move-class-status{background:rgba(167,219,141,.15);color:#a7db8d;border:1px solid rgba(167,219,141,.3)}
+
+.move-pp-bar{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.move-pp-fill{height:100%;border-radius:99px;background:var(--accent);opacity:.7}
+
+.move-detail-btn{
+  margin-top:auto;height:32px;border-radius:6px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-family:'Space Grotesk',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.move-detail-btn:hover{
+  background:var(--accent-faint);border-color:var(--accent-border);color:var(--accent);
+}
+
+/* Loading */
+.page-loading{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:16px;padding:80px;
+  color:var(--text-muted);font-size:14px;grid-column:1/-1;
+}
+
+/* ── Modal move detail ── */
+.modal-move-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.modal-move-icon{
+  width:56px;height:56px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.modal-move-title{font-family:'Exo 2',sans-serif;font-size:1.6rem;font-weight:900;text-transform:capitalize;margin-bottom:6px}
+.modal-badges{display:flex;gap:8px;flex-wrap:wrap}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:20px 0}
+.modal-stat-box{
+  background:var(--bg-inner);border:1px solid var(--border);
+  border-radius:8px;padding:12px;text-align:center;
+}
+.modal-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.modal-stat-value{font-size:20px;font-weight:800;color:var(--text-primary)}
+.modal-desc{font-size:14px;color:var(--text-muted);line-height:1.7;padding:16px;background:var(--bg-inner);border-radius:8px;border:1px solid var(--border)}
+.modal-learnt-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin:20px 0 10px}
+.learnt-by-grid{display:flex;flex-wrap:wrap;gap:8px;max-height:180px;overflow-y:auto}
+.learnt-by-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:6px;
+  background:var(--bg-inner);border:1px solid var(--border);
+  font-size:12px;font-weight:500;color:var(--text-muted);
+  text-decoration:none;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.learnt-by-chip:hover{border-color:var(--accent-border);color:var(--accent)}
+.learnt-by-chip img{width:28px;height:28px;image-rendering:pixelated}
+
+@media(max-width:600px){
+  .page-wrap{padding:24px 16px 60px}
+  .modal-stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="header-logo">Poké<span>dex</span></a>
+  <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link" data-page="pokedex">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
+    </a>
+    <a href="moves.html" class="nav-link active" data-page="moves">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
+    </a>
+    <a href="compare.html" class="nav-link" data-page="compare">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
+    </a>
+    <a href="team.html" class="nav-link" data-page="team">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
+    </a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <h1 class="page-title">Move<span>dex</span></h1>
+    <div class="moves-stats-bar" id="moves-stats-bar">
+      <div class="stat-pill">Carregando...</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-box-moves">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="move-search" placeholder="Buscar move por nome..." oninput="applyFilters()" autocomplete="off"/>
+    </div>
+    <div class="filter-row" id="type-filters"></div>
+    <div class="filter-row" id="class-filters">
+      <button class="filter-btn active" onclick="setClassFilter('all',this)">Todos</button>
+      <button class="filter-btn" onclick="setClassFilter('physical',this)" style="color:#f5ac78">Físico</button>
+      <button class="filter-btn" onclick="setClassFilter('special',this)" style="color:#9db7f5">Especial</button>
+      <button class="filter-btn" onclick="setClassFilter('status',this)" style="color:#a7db8d">Status</button>
+    </div>
+  </div>
+
+  <div class="moves-grid" id="moves-grid">
+    <div class="page-loading"><div class="pokeball-loader"></div><p>Carregando moves...</p></div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="move-modal" style="display:none"></div>
+
+<script src="js/shared.js"></script>
+<script>
+const MOVE_TYPE_EMOJIS = {fire:'🔥',water:'💧',grass:'🌿',electric:'⚡',ice:'❄️',fighting:'👊',poison:'☠️',ground:'🌍',flying:'🌬️',psychic:'🔮',bug:'🐛',rock:'🪨',ghost:'👻',dragon:'🐉',dark:'🌑',steel:'⚙️',fairy:'✨',normal:'⭐'}
+const CLASS_COLORS = {physical:'#f5ac78',special:'#9db7f5',status:'#a7db8d'}
+const CLASS_PT = {physical:'Físico',special:'Especial',status:'Status'}
+
+let allMoves = []
+let activeType = 'all'
+let activeClass = 'all'
+let moveCache = {}
+
+async function loadMoves() {
+  const list = await apiFetch('https://pokeapi.co/api/v2/move?limit=900')
+  const moves = await Promise.all(
+    list.results.map(async m => {
+      try {
+        const d = await apiFetch(m.url)
+        return d
+      } catch(e) { return null }
+    })
+  )
+  allMoves = moves.filter(Boolean)
+  buildTypeFilters()
+  applyFilters()
+  updateStatsBar()
+}
+
+function buildTypeFilters() {
+  const types = [...new Set(allMoves.map(m=>m.type?.name).filter(Boolean))].sort()
+  const container = document.getElementById('type-filters')
+  container.innerHTML = `<button class="filter-btn active" onclick="setTypeFilter('all',this)">Todos</button>` +
+    types.map(t => `<button class="filter-btn" onclick="setTypeFilter('${t}',this)" style="color:${TYPE_COLORS[t]||'#aaa'}">${cap(t)}</button>`).join('')
+}
+
+function setTypeFilter(type, btn) {
+  activeType = type
+  document.querySelectorAll('#type-filters .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  applyFilters()
+}
+function setClassFilter(cls, btn) {
+  activeClass = cls
+  document.querySelectorAll('#class-filters .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  applyFilters()
+}
+
+function applyFilters() {
+  const q = document.getElementById('move-search').value.toLowerCase().trim()
+  let filtered = allMoves
+  if (activeType !== 'all') filtered = filtered.filter(m=>m.type?.name===activeType)
+  if (activeClass !== 'all') filtered = filtered.filter(m=>m.damage_class?.name===activeClass)
+  if (q) filtered = filtered.filter(m=>m.name.includes(q)||slug(m.name).includes(q))
+  renderMoves(filtered)
+  updateStatsBar(filtered)
+}
+
+function updateStatsBar(moves) {
+  const set = moves || allMoves
+  const bar = document.getElementById('moves-stats-bar')
+  bar.innerHTML = `
+    <div class="stat-pill">Total<strong>${set.length}</strong></div>
+    <div class="stat-pill">Físico<strong>${set.filter(m=>m.damage_class?.name==='physical').length}</strong></div>
+    <div class="stat-pill">Especial<strong>${set.filter(m=>m.damage_class?.name==='special').length}</strong></div>
+    <div class="stat-pill">Status<strong>${set.filter(m=>m.damage_class?.name==='status').length}</strong></div>
+  `
+}
+
+function renderMoves(moves) {
+  const grid = document.getElementById('moves-grid')
+  if (!moves.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-dim)">Nenhum move encontrado.</div>`
+    return
+  }
+  grid.innerHTML = moves.map(m => {
+    const type = m.type?.name || 'normal'
+    const cls = m.damage_class?.name || 'status'
+    const power = m.power || '—'
+    const acc = m.accuracy || '—'
+    const pp = m.pp || '—'
+    const ppPct = m.pp ? Math.min(100, m.pp/40*100) : 0
+    const typeColor = TYPE_COLORS[type] || '#888'
+    const typeBg = TYPE_BG[type] || '#888'
+    const clsLabel = CLASS_PT[cls] || cls
+    return `
+    <div class="move-card" style="--mc:${typeColor}" onclick="openMoveDetail('${m.name}')">
+      <div class="move-card-top">
+        <span class="move-name">${slug(m.name)}</span>
+        <span class="move-type-badge" style="background:${typeBg}">${type}</span>
+      </div>
+      <div class="move-meta">
+        <div class="move-meta-item"><span class="move-meta-label">Poder</span><span class="move-meta-value">${power}</span></div>
+        <div class="move-meta-item"><span class="move-meta-label">Precisão</span><span class="move-meta-value">${acc}${acc!=='—'?'%':''}</span></div>
+        <div class="move-meta-item"><span class="move-meta-label">PP</span><span class="move-meta-value">${pp}</span></div>
+        <span class="move-class-badge move-class-${cls}">${clsLabel}</span>
+      </div>
+      <div class="move-pp-bar"><div class="move-pp-fill" style="width:${ppPct}%"></div></div>
+      <button class="move-detail-btn" onclick="event.stopPropagation();openMoveDetail('${m.name}')">Ver detalhes →</button>
+    </div>`
+  }).join('')
+}
+
+async function openMoveDetail(name) {
+  const modal = document.getElementById('move-modal')
+  modal.style.display = 'flex'
+  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease'
+  modal.innerHTML = `<div class="modal" style="max-width:600px;width:100%;background:var(--bg-card);border-radius:20px;border:1px solid var(--border-mid);padding:32px;position:relative;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px"><div class="pokeball-loader"></div><p style="color:var(--text-muted)">Carregando...</p></div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>`
+
+  let move = moveCache[name]
+  if (!move) {
+    move = await apiFetch(`https://pokeapi.co/api/v2/move/${name}`)
+    moveCache[name] = move
+  }
+
+  const type = move.type?.name || 'normal'
+  const cls = move.damage_class?.name || 'status'
+  const typeBg = TYPE_BG[type] || '#888'
+  const typeColor = TYPE_COLORS[type] || '#888'
+  const clsColor = CLASS_COLORS[cls] || '#888'
+  const desc = move.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\n|\f/g,' ') || ''
+  const effect = move.effect_entries?.find(e=>e.language.name==='en')?.short_effect?.replace(/\$effect_chance/g,move.effect_chance||'') || ''
+
+  // Pokémons that learn this move
+  const learners = (move.learned_by_pokemon || []).slice(0,30)
+
+  const learnersHTML = learners.map(p => {
+    const id = p.url.split('/').filter(Boolean).pop()
+    const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+    return `<a class="learnt-by-chip" href="pokemon.html?id=${id}" title="${cap(p.name)}">
+      <img src="${sprite}" alt="${p.name}"/>${cap(p.name)}
+    </a>`
+  }).join('')
+
+  modal.querySelector('.modal').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-move-header">
+      <div class="modal-move-icon" style="background:rgba(${hexToRgb(typeBg)},0.15)">
+        <span style="font-size:24px">${MOVE_TYPE_EMOJIS[type]||'⭐'}</span>
+      </div>
+      <div>
+        <div class="modal-move-title">${slug(move.name)}</div>
+        <div class="modal-badges">
+          <span class="type type-${type}">${type}</span>
+          <span class="move-class-badge move-class-${cls}">${CLASS_PT[cls]||cls}</span>
+          ${move.meta?.category?.name ? `<span style="font-size:12px;color:var(--text-muted);padding:4px 8px;background:var(--bg-inner);border-radius:6px;border:1px solid var(--border)">${cap(slug(move.meta.category.name))}</span>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat-box"><div class="modal-stat-label">Poder</div><div class="modal-stat-value">${move.power||'—'}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">Precisão</div><div class="modal-stat-value">${move.accuracy?move.accuracy+'%':'—'}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">PP</div><div class="modal-stat-value">${move.pp||'—'}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">Prioridade</div><div class="modal-stat-value">${move.priority}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">Alvo</div><div class="modal-stat-value" style="font-size:13px">${cap(slug(move.target?.name||'—'))}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">Geração</div><div class="modal-stat-value" style="font-size:14px">${cap(slug(move.generation?.name||'—')).replace('Generation-','Gen ')}</div></div>
+    </div>
+    ${desc ? `<div class="modal-desc">${desc}</div>` : ''}
+    ${effect && effect !== desc ? `<div class="modal-desc" style="margin-top:8px;border-color:${typeColor}33">${effect}</div>` : ''}
+    ${learners.length ? `
+      <p class="modal-learnt-title">Aprendido por (${learners.length} de ${move.learned_by_pokemon?.length||0})</p>
+      <div class="learnt-by-grid">${learnersHTML}</div>
+    ` : ''}
+  `
+}
+
+function closeModal() {
+  document.getElementById('move-modal').style.display = 'none'
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal() })
+
+function hexToRgb(hex) {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '128,128,128'
+}
+
+loadMoves()
+</script>
+</body>
+</html>

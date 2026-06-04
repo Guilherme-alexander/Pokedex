@@ -2,59 +2,74 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="css/style.css" rel="stylesheet" type="text/css">
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/shared.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
   <title>Pokédex</title>
 </head>
 <body>
-  <div class="content">
-    <h1 class="page-title">Poké<span>dex</span></h1>
-    <div class="search-wrap">
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input
-          type="text"
-          id="search-input"
-          class="search-input"
-          placeholder="Buscar por nome ou #número..."
-          oninput="handleSearch(this.value)"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpar">✕</button>
-      </div>
-      <div class="search-status" id="search-status"></div>
+
+<header class="site-header">
+  <a href="index.html" class="header-logo">Poké<span>dex</span></a>
+  <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link active" data-page="pokedex">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
+    </a>
+    <a href="moves.html" class="nav-link" data-page="moves">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
+    </a>
+    <a href="compare.html" class="nav-link" data-page="compare">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
+    </a>
+    <a href="team.html" class="nav-link" data-page="team">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
+    </a>
+  </nav>
+</header>
+
+<div class="content">
+  <h1 class="page-title">Poké<span>dex</span></h1>
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-input" class="search-input" placeholder="Buscar por nome ou #número..." oninput="handleSearch(this.value)" autocomplete="off" spellcheck="false"/>
+      <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpar">✕</button>
     </div>
-    <nav>
-      <button style="background:#fd7d24" class="btn" onclick="filterType('fire')">Fire</button>
-      <button style="background:#1E90FF" class="btn" onclick="filterType('water')">Water</button>
-      <button style="background:#78a84a" class="btn" onclick="filterType('grass')">Grass</button>
-      <button style="background:#526a36" class="btn" onclick="filterType('bug')">Bug</button>
-      <button style="background:#999"    class="btn" onclick="filterType('flying')">Flying</button>
-      <button style="background:#b97fc9" class="btn" onclick="filterType('poison')">Poison</button>
-      <button style="background:#ffbd00" class="btn" onclick="filterType('electric')">Electric</button>
-      <button style="background:#cdb25a" class="btn" onclick="filterType('ground')">Ground</button>
-      <button style="background:#e27a9d" class="btn" onclick="filterType('fairy')">Fairy</button>
-      <button style="background:#dc439d" class="btn" onclick="filterType('psychic')">Psychic</button>
-      <button style="background:#ea3b3b" class="btn" onclick="filterType('fighting')">Fighting</button>
-      <button style="background:#a38c21" class="btn" onclick="filterType('rock')">Rock</button>
-      <button style="background:#7b62a3" class="btn" onclick="filterType('ghost')">Ghost</button>
-      <button style="background:#51c4e7" class="btn" onclick="filterType('ice')">Ice</button>
-      <button style="background:#7766ee" class="btn" onclick="filterType('dragon')">Dragon</button>
-      <button style="background:#444"    class="btn" onclick="filterType('dark')">Dark</button>
-      <button style="background:#888"    class="btn" onclick="filterType('steel')">Steel</button>
-      <button style="background:#888"    class="btn" onclick="filterType('normal')">Normal</button>
-      <button style="background:#e8ff47;color:#111" class="btn" onclick="filterType('')">Todos</button>
-    </nav>
+    <div class="search-status" id="search-status"></div>
   </div>
+  <nav>
+    <button style="background:#fd7d24" class="btn" onclick="filterType('fire')">Fire</button>
+    <button style="background:#1E90FF" class="btn" onclick="filterType('water')">Water</button>
+    <button style="background:#78a84a" class="btn" onclick="filterType('grass')">Grass</button>
+    <button style="background:#526a36" class="btn" onclick="filterType('bug')">Bug</button>
+    <button style="background:#999"    class="btn" onclick="filterType('flying')">Flying</button>
+    <button style="background:#b97fc9" class="btn" onclick="filterType('poison')">Poison</button>
+    <button style="background:#ffbd00" class="btn" onclick="filterType('electric')">Electric</button>
+    <button style="background:#cdb25a" class="btn" onclick="filterType('ground')">Ground</button>
+    <button style="background:#e27a9d" class="btn" onclick="filterType('fairy')">Fairy</button>
+    <button style="background:#dc439d" class="btn" onclick="filterType('psychic')">Psychic</button>
+    <button style="background:#ea3b3b" class="btn" onclick="filterType('fighting')">Fighting</button>
+    <button style="background:#a38c21" class="btn" onclick="filterType('rock')">Rock</button>
+    <button style="background:#7b62a3" class="btn" onclick="filterType('ghost')">Ghost</button>
+    <button style="background:#51c4e7" class="btn" onclick="filterType('ice')">Ice</button>
+    <button style="background:#7766ee" class="btn" onclick="filterType('dragon')">Dragon</button>
+    <button style="background:#444"    class="btn" onclick="filterType('dark')">Dark</button>
+    <button style="background:#888"    class="btn" onclick="filterType('steel')">Steel</button>
+    <button style="background:#888"    class="btn" onclick="filterType('normal')">Normal</button>
+    <button style="background:#e8ff47;color:#111" class="btn" onclick="filterType('')">Todos</button>
+  </nav>
+</div>
 
-  <div class="container">
-    <ul data-js="pokedex" class="pokedex"></ul>
-  </div>
+<div class="container">
+  <ul data-js="pokedex" class="pokedex"></ul>
+</div>
 
-  <script src="js/requests.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/requests.js"></script>
 </body>
 </html>

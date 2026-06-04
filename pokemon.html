@@ -3,10 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/shared.css" rel="stylesheet">
   <link href="css/status.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
   <title>Pokédex - Pokémon</title>
 </head>
 <body>
+
+<header class="site-header">
+  <a href="index.html" class="header-logo">Poké<span>dex</span></a>
+  <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link active" data-page="pokedex">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
+    </a>
+    <a href="moves.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
+    </a>
+    <a href="compare.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
+    </a>
+    <a href="team.html" class="nav-link">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
+    </a>
+  </nav>
+</header>
+
 <div class="container">
   <a href="index.html" class="back">← voltar</a>
   <div class="pokemon-card" data-js="pokemon">
