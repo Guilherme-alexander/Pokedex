@@ -10,6 +10,24 @@
 <body>
   <div class="content">
     <h1 class="page-title">Poké<span>dex</span></h1>
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Buscar por nome ou #número..."
+          oninput="handleSearch(this.value)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpar">✕</button>
+      </div>
+      <div class="search-status" id="search-status"></div>
+    </div>
     <nav>
       <button style="background:#fd7d24" class="btn" onclick="filterType('fire')">Fire</button>
       <button style="background:#1E90FF" class="btn" onclick="filterType('water')">Water</button>
