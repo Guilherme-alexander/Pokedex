@@ -178,14 +178,27 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
     </div>
   </div>
 
+  <!-- Progress bar -->
+  <div id="load-progress-wrap" style="display:none;flex-direction:column;gap:6px;margin-bottom:16px">
+    <div style="font-size:12px;color:var(--text-muted)" id="load-progress-label">Carregando moves...</div>
+    <div style="height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden">
+      <div id="load-progress-fill" style="height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s"></div>
+    </div>
+  </div>
+
   <div class="controls">
     <div class="search-box-moves">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="move-search" placeholder="Buscar move por nome..." oninput="applyFilters()" autocomplete="off"/>
     </div>
+    <div class="filter-row" id="special-filters">
+      <button class="filter-btn active" onclick="setSpecialFilter('all',this)">Todos</button>
+      <button class="filter-btn" onclick="setSpecialFilter('normal',this)">Normais</button>
+      <button class="filter-btn" onclick="setSpecialFilter('zmove',this)" style="color:var(--accent)">⚡ Z-Moves</button>
+    </div>
     <div class="filter-row" id="type-filters"></div>
     <div class="filter-row" id="class-filters">
-      <button class="filter-btn active" onclick="setClassFilter('all',this)">Todos</button>
+      <button class="filter-btn active" onclick="setClassFilter('all',this)">Classe: Todos</button>
       <button class="filter-btn" onclick="setClassFilter('physical',this)" style="color:#f5ac78">Físico</button>
       <button class="filter-btn" onclick="setClassFilter('special',this)" style="color:#9db7f5">Especial</button>
       <button class="filter-btn" onclick="setClassFilter('status',this)" style="color:#a7db8d">Status</button>
@@ -202,36 +215,141 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
 
 <script src="js/shared.js"></script>
 <script>
+/* ── Constants ── */
 const MOVE_TYPE_EMOJIS = {fire:'🔥',water:'💧',grass:'🌿',electric:'⚡',ice:'❄️',fighting:'👊',poison:'☠️',ground:'🌍',flying:'🌬️',psychic:'🔮',bug:'🐛',rock:'🪨',ghost:'👻',dragon:'🐉',dark:'🌑',steel:'⚙️',fairy:'✨',normal:'⭐'}
-const CLASS_COLORS = {physical:'#f5ac78',special:'#9db7f5',status:'#a7db8d'}
 const CLASS_PT = {physical:'Físico',special:'Especial',status:'Status'}
 
-let allMoves = []
+/* Z-Move list (hardcoded — not in PokéAPI moves endpoint) */
+const Z_MOVE_LIST = [
+  {name:'breakneck-blitz',type:'normal',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'all-out-pummeling',type:'fighting',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'supersonic-skystrike',type:'flying',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'acid-downpour',type:'poison',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'tectonic-rage',type:'ground',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'continental-crush',type:'rock',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'savage-spin-out',type:'bug',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'never-ending-nightmare',type:'ghost',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'corkscrew-crash',type:'steel',class:'physical',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'inferno-overdrive',type:'fire',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'hydro-vortex',type:'water',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'bloom-doom',type:'grass',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'gigavolt-havoc',type:'electric',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'shattered-psyche',type:'psychic',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'subzero-slammer',type:'ice',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'devastating-drake',type:'dragon',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'black-hole-eclipse',type:'dark',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'twinkle-tackle',type:'fairy',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+  // Signature Z-Moves
+  {name:'catastropika',type:'electric',class:'physical',power:210,pp:1,accuracy:null,isZ:true},
+  {name:'10-000-000-volt-thunderbolt',type:'electric',class:'special',power:195,pp:1,accuracy:null,isZ:true},
+  {name:'stoked-sparksurfer',type:'electric',class:'special',power:175,pp:1,accuracy:null,isZ:true},
+  {name:'pulverizing-pancake',type:'normal',class:'physical',power:210,pp:1,accuracy:null,isZ:true},
+  {name:'extreme-evoboost',type:'normal',class:'status',power:null,pp:1,accuracy:null,isZ:true},
+  {name:'genesis-supernova',type:'psychic',class:'special',power:185,pp:1,accuracy:null,isZ:true},
+  {name:'sinister-arrow-raid',type:'ghost',class:'physical',power:180,pp:1,accuracy:null,isZ:true},
+  {name:'malicious-moonsault',type:'dark',class:'physical',power:180,pp:1,accuracy:null,isZ:true},
+  {name:'oceanic-operetta',type:'water',class:'special',power:195,pp:1,accuracy:null,isZ:true},
+  {name:'soul-stealing-7-star-strike',type:'ghost',class:'physical',power:195,pp:1,accuracy:null,isZ:true},
+  {name:'splintered-stormshards',type:'rock',class:'physical',power:190,pp:1,accuracy:null,isZ:true},
+  {name:'lets-snuggle-forever',type:'fairy',class:'physical',power:190,pp:1,accuracy:null,isZ:true},
+  {name:'clangorous-soulblaze',type:'dragon',class:'special',power:185,pp:1,accuracy:null,isZ:true},
+  {name:'guardian-of-alola',type:'fairy',class:'special',power:null,pp:1,accuracy:null,isZ:true},
+]
+
+/* ── State ── */
+let allMoves = []       // fully loaded
+let moveUrls = []       // list from API
 let activeType = 'all'
 let activeClass = 'all'
+let activeSpecial = 'all'  // 'all' | 'zmove' | 'normal'
 let moveCache = {}
+let loadedCount = 0
+let isLoading = false
+const CHUNK = 50
 
+/* ── Load list then fetch in chunks ── */
 async function loadMoves() {
-  const list = await apiFetch('https://pokeapi.co/api/v2/move?limit=900')
-  const moves = await Promise.all(
-    list.results.map(async m => {
-      try {
-        const d = await apiFetch(m.url)
-        return d
-      } catch(e) { return null }
+  setLoadingBar(true, 0)
+  const list = await apiFetch('https://pokeapi.co/api/v2/move?limit=950')
+  moveUrls = list.results
+
+  // Inject Z-moves into the list so they appear in filters
+  Z_MOVE_LIST.forEach(z => {
+    allMoves.push({
+      name: z.name,
+      type: { name: z.type },
+      damage_class: { name: z.class },
+      power: z.power,
+      accuracy: z.accuracy,
+      pp: z.pp,
+      priority: 0,
+      isZ: true,
+      flavor_text_entries: [],
+      effect_entries: [],
+      learned_by_pokemon: [],
+      meta: null,
+      generation: { name: 'generation-vii' },
+      target: { name: 'selected-pokemon' }
     })
-  )
-  allMoves = moves.filter(Boolean)
+  })
+
   buildTypeFilters()
   applyFilters()
   updateStatsBar()
+  await fetchNextChunk()
 }
 
+async function fetchNextChunk() {
+  if (isLoading || loadedCount >= moveUrls.length) {
+    setLoadingBar(false, 100)
+    return
+  }
+  isLoading = true
+  const slice = moveUrls.slice(loadedCount, loadedCount + CHUNK)
+  const results = await Promise.allSettled(slice.map(m => apiFetch(m.url)))
+
+  results.forEach(r => {
+    if (r.status === 'fulfilled' && r.value) {
+      allMoves.push(r.value)
+    }
+  })
+  loadedCount += slice.length
+
+  const pct = Math.round((loadedCount / moveUrls.length) * 100)
+  setLoadingBar(true, pct, loadedCount, moveUrls.length)
+
+  buildTypeFilters()
+  applyFilters()
+  updateStatsBar()
+  isLoading = false
+
+  // Schedule next chunk without blocking UI
+  if (loadedCount < moveUrls.length) {
+    setTimeout(fetchNextChunk, 50)
+  } else {
+    setLoadingBar(false, 100)
+  }
+}
+
+function setLoadingBar(visible, pct, loaded, total) {
+  const bar = document.getElementById('load-progress-wrap')
+  const fill = document.getElementById('load-progress-fill')
+  const label = document.getElementById('load-progress-label')
+  if (!bar) return
+  bar.style.display = visible ? 'flex' : 'none'
+  fill.style.width = pct + '%'
+  if (label && loaded !== undefined) {
+    label.textContent = `Carregando moves... ${loaded}/${total} (${pct}%)`
+  }
+}
+
+/* ── Filters ── */
 function buildTypeFilters() {
   const types = [...new Set(allMoves.map(m=>m.type?.name).filter(Boolean))].sort()
   const container = document.getElementById('type-filters')
-  container.innerHTML = `<button class="filter-btn active" onclick="setTypeFilter('all',this)">Todos</button>` +
-    types.map(t => `<button class="filter-btn" onclick="setTypeFilter('${t}',this)" style="color:${TYPE_COLORS[t]||'#aaa'}">${cap(t)}</button>`).join('')
+  const active = container.querySelector('.active')?.dataset?.type || 'all'
+  container.innerHTML = `<button class="filter-btn ${active==='all'?'active':''}" data-type="all" onclick="setTypeFilter('all',this)">Todos</button>` +
+    types.map(t => `<button class="filter-btn ${active===t?'active':''}" data-type="${t}" onclick="setTypeFilter('${t}',this)" style="color:${TYPE_COLORS[t]||'#aaa'}">${cap(t)}</button>`).join('')
 }
 
 function setTypeFilter(type, btn) {
@@ -246,12 +364,20 @@ function setClassFilter(cls, btn) {
   btn.classList.add('active')
   applyFilters()
 }
+function setSpecialFilter(val, btn) {
+  activeSpecial = val
+  document.querySelectorAll('#special-filters .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  applyFilters()
+}
 
 function applyFilters() {
   const q = document.getElementById('move-search').value.toLowerCase().trim()
   let filtered = allMoves
-  if (activeType !== 'all') filtered = filtered.filter(m=>m.type?.name===activeType)
-  if (activeClass !== 'all') filtered = filtered.filter(m=>m.damage_class?.name===activeClass)
+  if (activeType !== 'all')    filtered = filtered.filter(m=>m.type?.name===activeType)
+  if (activeClass !== 'all')   filtered = filtered.filter(m=>m.damage_class?.name===activeClass)
+  if (activeSpecial === 'zmove')  filtered = filtered.filter(m=>m.isZ)
+  if (activeSpecial === 'normal') filtered = filtered.filter(m=>!m.isZ)
   if (q) filtered = filtered.filter(m=>m.name.includes(q)||slug(m.name).includes(q))
   renderMoves(filtered)
   updateStatsBar(filtered)
@@ -259,13 +385,38 @@ function applyFilters() {
 
 function updateStatsBar(moves) {
   const set = moves || allMoves
-  const bar = document.getElementById('moves-stats-bar')
-  bar.innerHTML = `
-    <div class="stat-pill">Total<strong>${set.length}</strong></div>
-    <div class="stat-pill">Físico<strong>${set.filter(m=>m.damage_class?.name==='physical').length}</strong></div>
-    <div class="stat-pill">Especial<strong>${set.filter(m=>m.damage_class?.name==='special').length}</strong></div>
-    <div class="stat-pill">Status<strong>${set.filter(m=>m.damage_class?.name==='status').length}</strong></div>
+  document.getElementById('moves-stats-bar').innerHTML = `
+    <div class="stat-pill">Total <strong>${set.length}</strong></div>
+    <div class="stat-pill">Físico <strong>${set.filter(m=>m.damage_class?.name==='physical').length}</strong></div>
+    <div class="stat-pill">Especial <strong>${set.filter(m=>m.damage_class?.name==='special').length}</strong></div>
+    <div class="stat-pill">Status <strong>${set.filter(m=>m.damage_class?.name==='status').length}</strong></div>
+    <div class="stat-pill" style="color:#e8ff47">Z-Moves <strong>${set.filter(m=>m.isZ).length}</strong></div>
   `
+}
+
+/* ── Render cards ── */
+function makeMoveCard(m) {
+  const type = m.type?.name || 'normal'
+  const cls  = m.damage_class?.name || 'status'
+  const typeColor = TYPE_COLORS[type] || '#888'
+  const typeBg    = TYPE_BG[type] || '#888'
+  const ppPct = m.pp ? Math.min(100, m.pp/40*100) : 0
+  const zBadge = m.isZ ? `<span style="font-size:9px;font-weight:800;text-transform:uppercase;padding:2px 6px;border-radius:20px;background:rgba(232,255,71,.15);color:var(--accent);border:1px solid rgba(232,255,71,.3);letter-spacing:.5px">Z</span>` : ''
+  return `
+  <div class="move-card" style="--mc:${typeColor}" onclick="openMoveDetail('${m.name}')">
+    <div class="move-card-top">
+      <span class="move-name">${slug(m.name)}</span>
+      <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">${zBadge}<span class="move-type-badge" style="background:${typeBg}">${type}</span></div>
+    </div>
+    <div class="move-meta">
+      <div class="move-meta-item"><span class="move-meta-label">Poder</span><span class="move-meta-value">${m.power||'—'}</span></div>
+      <div class="move-meta-item"><span class="move-meta-label">Precisão</span><span class="move-meta-value">${m.accuracy?m.accuracy+'%':'—'}</span></div>
+      <div class="move-meta-item"><span class="move-meta-label">PP</span><span class="move-meta-value">${m.pp||'—'}</span></div>
+      <span class="move-class-badge move-class-${cls}">${CLASS_PT[cls]||cls}</span>
+    </div>
+    <div class="move-pp-bar"><div class="move-pp-fill" style="width:${ppPct}%"></div></div>
+    <button class="move-detail-btn" onclick="event.stopPropagation();openMoveDetail('${m.name}')">Ver detalhes →</button>
+  </div>`
 }
 
 function renderMoves(moves) {
@@ -274,80 +425,60 @@ function renderMoves(moves) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-dim)">Nenhum move encontrado.</div>`
     return
   }
-  grid.innerHTML = moves.map(m => {
-    const type = m.type?.name || 'normal'
-    const cls = m.damage_class?.name || 'status'
-    const power = m.power || '—'
-    const acc = m.accuracy || '—'
-    const pp = m.pp || '—'
-    const ppPct = m.pp ? Math.min(100, m.pp/40*100) : 0
-    const typeColor = TYPE_COLORS[type] || '#888'
-    const typeBg = TYPE_BG[type] || '#888'
-    const clsLabel = CLASS_PT[cls] || cls
-    return `
-    <div class="move-card" style="--mc:${typeColor}" onclick="openMoveDetail('${m.name}')">
-      <div class="move-card-top">
-        <span class="move-name">${slug(m.name)}</span>
-        <span class="move-type-badge" style="background:${typeBg}">${type}</span>
-      </div>
-      <div class="move-meta">
-        <div class="move-meta-item"><span class="move-meta-label">Poder</span><span class="move-meta-value">${power}</span></div>
-        <div class="move-meta-item"><span class="move-meta-label">Precisão</span><span class="move-meta-value">${acc}${acc!=='—'?'%':''}</span></div>
-        <div class="move-meta-item"><span class="move-meta-label">PP</span><span class="move-meta-value">${pp}</span></div>
-        <span class="move-class-badge move-class-${cls}">${clsLabel}</span>
-      </div>
-      <div class="move-pp-bar"><div class="move-pp-fill" style="width:${ppPct}%"></div></div>
-      <button class="move-detail-btn" onclick="event.stopPropagation();openMoveDetail('${m.name}')">Ver detalhes →</button>
-    </div>`
-  }).join('')
+  grid.innerHTML = moves.map(makeMoveCard).join('')
 }
 
+/* ── Move detail modal ── */
 async function openMoveDetail(name) {
   const modal = document.getElementById('move-modal')
-  modal.style.display = 'flex'
-  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease'
-  modal.innerHTML = `<div class="modal" style="max-width:600px;width:100%;background:var(--bg-card);border-radius:20px;border:1px solid var(--border-mid);padding:32px;position:relative;max-height:85vh;overflow-y:auto">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px"><div class="pokeball-loader"></div><p style="color:var(--text-muted)">Carregando...</p></div>
-    <button class="modal-close" onclick="closeModal()">✕</button>
-  </div>`
+  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px'
+  modal.innerHTML = `<div style="max-width:600px;width:100%;background:var(--bg-card);border-radius:20px;border:1px solid rgba(255,255,255,.13);padding:32px;position:relative;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px"><div class="pokeball-loader"></div></div>
+    <button class="modal-close" onclick="closeModal()">✕</button></div>`
 
+  // Z-moves may not be in the API — build from local data
   let move = moveCache[name]
   if (!move) {
-    move = await apiFetch(`https://pokeapi.co/api/v2/move/${name}`)
+    const zLocal = Z_MOVE_LIST.find(z=>z.name===name)
+    if (zLocal) {
+      move = {
+        name: zLocal.name, type:{name:zLocal.type}, damage_class:{name:zLocal.class},
+        power:zLocal.power, accuracy:zLocal.accuracy, pp:zLocal.pp, priority:0,
+        isZ:true, flavor_text_entries:[], effect_entries:[], learned_by_pokemon:[],
+        meta:null, generation:{name:'generation-vii'}, target:{name:'selected-pokemon'}
+      }
+    } else {
+      try { move = await apiFetch(`https://pokeapi.co/api/v2/move/${name}`) } catch(e) {}
+    }
     moveCache[name] = move
   }
+  if (!move) return
 
-  const type = move.type?.name || 'normal'
-  const cls = move.damage_class?.name || 'status'
-  const typeBg = TYPE_BG[type] || '#888'
+  const type    = move.type?.name || 'normal'
+  const cls     = move.damage_class?.name || 'status'
+  const typeBg  = TYPE_BG[type] || '#888'
   const typeColor = TYPE_COLORS[type] || '#888'
-  const clsColor = CLASS_COLORS[cls] || '#888'
-  const desc = move.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\n|\f/g,' ') || ''
-  const effect = move.effect_entries?.find(e=>e.language.name==='en')?.short_effect?.replace(/\$effect_chance/g,move.effect_chance||'') || ''
-
-  // Pokémons that learn this move
-  const learners = (move.learned_by_pokemon || []).slice(0,30)
-
-  const learnersHTML = learners.map(p => {
-    const id = p.url.split('/').filter(Boolean).pop()
-    const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
-    return `<a class="learnt-by-chip" href="pokemon.html?id=${id}" title="${cap(p.name)}">
-      <img src="${sprite}" alt="${p.name}"/>${cap(p.name)}
-    </a>`
+  const desc    = move.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\n|\f/g,' ') || ''
+  const effect  = move.effect_entries?.find(e=>e.language.name==='en')?.short_effect?.replace(/\$effect_chance/g,move.effect_chance||'') || ''
+  const learners = (move.learned_by_pokemon||[]).slice(0,36)
+  const learnersHTML = learners.map(p=>{
+    const id=p.url.split('/').filter(Boolean).pop()
+    return `<a class="learnt-by-chip" href="pokemon.html?id=${id}">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" alt="${p.name}"/>${cap(p.name)}</a>`
   }).join('')
+  const zBanner = move.isZ ? `<div style="margin-bottom:12px;padding:8px 14px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.25);border-radius:8px;font-size:12px;color:var(--accent);font-weight:600">⚡ Z-Move — versão definitiva do tipo ${cap(type)}</div>` : ''
 
-  modal.querySelector('.modal').innerHTML = `
+  modal.querySelector('div').innerHTML = `
     <button class="modal-close" onclick="closeModal()">✕</button>
+    ${zBanner}
     <div class="modal-move-header">
-      <div class="modal-move-icon" style="background:rgba(${hexToRgb(typeBg)},0.15)">
-        <span style="font-size:24px">${MOVE_TYPE_EMOJIS[type]||'⭐'}</span>
-      </div>
+      <div class="modal-move-icon" style="background:${typeBg}22;width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${MOVE_TYPE_EMOJIS[type]||'⭐'}</div>
       <div>
         <div class="modal-move-title">${slug(move.name)}</div>
-        <div class="modal-badges">
+        <div class="modal-badges" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
           <span class="type type-${type}">${type}</span>
           <span class="move-class-badge move-class-${cls}">${CLASS_PT[cls]||cls}</span>
-          ${move.meta?.category?.name ? `<span style="font-size:12px;color:var(--text-muted);padding:4px 8px;background:var(--bg-inner);border-radius:6px;border:1px solid var(--border)">${cap(slug(move.meta.category.name))}</span>` : ''}
+          ${move.meta?.category?.name?`<span style="font-size:11px;color:var(--text-muted);padding:3px 8px;background:var(--bg-inner);border-radius:6px;border:1px solid var(--border)">${cap(slug(move.meta.category.name))}</span>`:''}
         </div>
       </div>
     </div>
@@ -355,28 +486,18 @@ async function openMoveDetail(name) {
       <div class="modal-stat-box"><div class="modal-stat-label">Poder</div><div class="modal-stat-value">${move.power||'—'}</div></div>
       <div class="modal-stat-box"><div class="modal-stat-label">Precisão</div><div class="modal-stat-value">${move.accuracy?move.accuracy+'%':'—'}</div></div>
       <div class="modal-stat-box"><div class="modal-stat-label">PP</div><div class="modal-stat-value">${move.pp||'—'}</div></div>
-      <div class="modal-stat-box"><div class="modal-stat-label">Prioridade</div><div class="modal-stat-value">${move.priority}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">Prioridade</div><div class="modal-stat-value">${move.priority??'—'}</div></div>
       <div class="modal-stat-box"><div class="modal-stat-label">Alvo</div><div class="modal-stat-value" style="font-size:13px">${cap(slug(move.target?.name||'—'))}</div></div>
-      <div class="modal-stat-box"><div class="modal-stat-label">Geração</div><div class="modal-stat-value" style="font-size:14px">${cap(slug(move.generation?.name||'—')).replace('Generation-','Gen ')}</div></div>
+      <div class="modal-stat-box"><div class="modal-stat-label">Geração</div><div class="modal-stat-value" style="font-size:13px">${cap(slug(move.generation?.name||'—')).replace('Generation-','Gen ')}</div></div>
     </div>
-    ${desc ? `<div class="modal-desc">${desc}</div>` : ''}
-    ${effect && effect !== desc ? `<div class="modal-desc" style="margin-top:8px;border-color:${typeColor}33">${effect}</div>` : ''}
-    ${learners.length ? `
-      <p class="modal-learnt-title">Aprendido por (${learners.length} de ${move.learned_by_pokemon?.length||0})</p>
-      <div class="learnt-by-grid">${learnersHTML}</div>
-    ` : ''}
+    ${desc?`<div class="modal-desc">${desc}</div>`:''}
+    ${effect&&effect!==desc?`<div class="modal-desc" style="margin-top:8px;border-color:${typeColor}33">${effect}</div>`:''}
+    ${learners.length?`<p class="modal-learnt-title">Aprendido por (${learners.length} de ${move.learned_by_pokemon?.length||0})</p><div class="learnt-by-grid">${learnersHTML}</div>`:''}
   `
 }
 
-function closeModal() {
-  document.getElementById('move-modal').style.display = 'none'
-}
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal() })
-
-function hexToRgb(hex) {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '128,128,128'
-}
+function closeModal() { document.getElementById('move-modal').style.display='none' }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal() })
 
 loadMoves()
 </script>

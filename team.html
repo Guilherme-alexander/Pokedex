@@ -531,7 +531,198 @@ document.addEventListener('keydown', e => {
   if (e.key==='Escape') { closeAddModal(); closeMovesetModal() }
 })
 
+/* ════════════════════════════════════════════
+   EXPORT / IMPORT
+════════════════════════════════════════════ */
+function buildExportData() {
+  const filled = team.filter(Boolean)
+  if (!filled.length) return null
+  return {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    team: filled.map(slot => {
+      const p = slot.data
+      return {
+        id: p.id,
+        name: p.name,
+        types: p.types.map(t=>t.type.name),
+        stats: Object.fromEntries(p.stats.map(s=>[s.stat.name, s.base_stat])),
+        abilities: p.abilities.map(a=>({ name:a.ability.name, isHidden:a.is_hidden })),
+        moves: slot.moves.filter(Boolean)
+      }
+    })
+  }
+}
+
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+function exportJSON() {
+  const data = buildExportData()
+  if (!data) return alert('Adicione pelo menos 1 Pokemon ao time.')
+  downloadFile(JSON.stringify(data, null, 2), 'pokemon-team.json', 'application/json')
+}
+
+function exportTXT() {
+  const data = buildExportData()
+  if (!data) return alert('Adicione pelo menos 1 Pokemon ao time.')
+  const SL = {hp:'HP',attack:'Ataque',defense:'Defesa','special-attack':'Atq. Esp.','special-defense':'Def. Esp.',speed:'Velocidade'}
+  const lines = [
+    '=======================================',
+    '         POKEMON TEAM EXPORT           ',
+    '  Exportado em: ' + new Date().toLocaleString('pt-BR'),
+    '=======================================',''
+  ]
+  data.team.forEach((p, i) => {
+    const bst = Object.values(p.stats).reduce((a,v)=>a+v,0)
+    lines.push('[' + (i+1) + '] #' + String(p.id).padStart(3,'0') + ' ' + p.name.toUpperCase())
+    lines.push('    Tipos    : ' + p.types.join(' / '))
+    lines.push('    BST Total: ' + bst)
+    lines.push('    Stats    : ' + Object.entries(p.stats).map(([k,v])=> (SL[k]||k) + ' ' + v).join(' | '))
+    lines.push('    Habilidades: ' + p.abilities.map(a=>a.name+(a.isHidden?' (oculta)':'')).join(', '))
+    if (p.moves.length) lines.push('    Moveset  : ' + p.moves.map(m=>m.replace(/-/g,' ')).join(' | '))
+    lines.push('')
+  })
+  const avgBST = Math.round(data.team.reduce((s,p)=>s+Object.values(p.stats).reduce((a,v)=>a+v,0),0)/data.team.length)
+  lines.push('---------------------------------------')
+  lines.push('Total de Pokemons : ' + data.team.length)
+  lines.push('BST Medio         : ' + avgBST)
+  lines.push('Gerado por Pokedex Web -- pokeapi.co')
+  downloadFile(lines.join('\n'), 'pokemon-team.txt', 'text/plain')
+}
+
+function exportMD() {
+  const data = buildExportData()
+  if (!data) return alert('Adicione pelo menos 1 Pokemon ao time.')
+  const SL = {hp:'HP',attack:'Ataque',defense:'Defesa','special-attack':'Atq. Esp.','special-defense':'Def. Esp.',speed:'Velocidade'}
+  const avgBST = Math.round(data.team.reduce((s,p)=>s+Object.values(p.stats).reduce((a,v)=>a+v,0),0)/data.team.length)
+  const lines = [
+    '# Pokemon Team Export','',
+    '> Exportado em **' + new Date().toLocaleString('pt-BR') + '** via Pokedex Web','',
+    '## Time',''
+  ]
+  data.team.forEach((p, i) => {
+    const bst = Object.values(p.stats).reduce((a,v)=>a+v,0)
+    const name = p.name.charAt(0).toUpperCase() + p.name.slice(1)
+    lines.push('### ' + (i+1) + '. #' + String(p.id).padStart(3,'0') + ' ' + name)
+    lines.push('')
+    lines.push('**Tipos:** ' + p.types.map(t=>'`'+t+'`').join(' · ') + '  ')
+    lines.push('**BST Total:** ' + bst + '  ')
+    lines.push('**Habilidades:** ' + p.abilities.map(a=>a.name+(a.isHidden?' *(oculta)*':'')).join(', ') + '  ')
+    if (p.moves.length) lines.push('**Moveset:** ' + p.moves.map(m=>'`'+m.replace(/-/g,' ')+'`').join(' | '))
+    lines.push('')
+    lines.push('| Stat | Valor |')
+    lines.push('|---|---|')
+    Object.entries(p.stats).forEach(([k,v]) => lines.push('| ' + (SL[k]||k) + ' | **' + v + '** |'))
+    lines.push('')
+  })
+  lines.push('---')
+  lines.push('## Resumo')
+  lines.push('')
+  lines.push('| Metrica | Valor |')
+  lines.push('|---|---|')
+  lines.push('| Pokemons | ' + data.team.length + ' |')
+  lines.push('| BST Medio | ' + avgBST + ' |')
+  lines.push('| Tipos unicos | ' + new Set(data.team.flatMap(p=>p.types)).size + ' |')
+  lines.push('')
+  lines.push('*Gerado por [Pokedex Web](https://pokeapi.co)*')
+  downloadFile(lines.join('\n'), 'pokemon-team.md', 'text/markdown')
+}
+
+function importJSON() {
+  document.getElementById('import-file-input').click()
+}
+
+async function handleImportFile(input) {
+  const file = input.files[0]
+  if (!file) return
+  const statusEl = document.getElementById('import-status')
+  try {
+    const text = await file.text()
+    const data = JSON.parse(text)
+    if (!data.team || !Array.isArray(data.team)) throw new Error('Formato invalido')
+    team = Array(6).fill(null)
+    statusEl.textContent = 'Carregando dados dos Pokemons...'
+    statusEl.style.color = 'var(--accent)'
+    await Promise.all(data.team.slice(0,6).map(async (p, i) => {
+      const pokeData = await apiFetch('https://pokeapi.co/api/v2/pokemon/' + p.id)
+      team[i] = { data: pokeData, moves: (p.moves||[]).concat([null,null,null,null]).slice(0,4) }
+    }))
+    renderGrid()
+    statusEl.textContent = 'Time importado com ' + data.team.length + ' Pokemon(s)!'
+    statusEl.style.color = '#9bcc50'
+    setTimeout(() => statusEl.textContent = '', 3000)
+  } catch(e) {
+    statusEl.textContent = 'Erro ao importar. Verifique o arquivo JSON.'
+    statusEl.style.color = '#ff5959'
+    setTimeout(() => statusEl.textContent = '', 3000)
+  }
+  input.value = ''
+}
+
 init()
 </script>
+
+<style>
+.export-section{max-width:1200px;margin:0 auto;padding:0 32px 60px}
+.export-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px}
+.export-title{font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
+.export-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.export-btn{
+  display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;border-radius:8px;
+  font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  transition:background .15s,border-color .15s,transform .12s;border:1px solid var(--border);
+  background:var(--bg-inner);color:var(--text-muted);
+}
+.export-btn:hover{transform:translateY(-1px);color:var(--text-primary);border-color:var(--border-mid)}
+.export-btn.json{border-color:rgba(157,183,245,.35);color:#9db7f5;background:rgba(157,183,245,.08)}
+.export-btn.json:hover{background:rgba(157,183,245,.15)}
+.export-btn.txt{border-color:rgba(167,219,141,.35);color:#a7db8d;background:rgba(167,219,141,.08)}
+.export-btn.txt:hover{background:rgba(167,219,141,.15)}
+.export-btn.md{border-color:rgba(232,255,71,.35);color:var(--accent);background:var(--accent-faint)}
+.export-btn.md:hover{background:rgba(232,255,71,.15)}
+.export-btn.import-btn{border-color:rgba(245,172,120,.35);color:#f5ac78;background:rgba(245,172,120,.08)}
+.export-btn.import-btn:hover{background:rgba(245,172,120,.15)}
+.export-divider{width:1px;height:28px;background:var(--border);flex-shrink:0}
+#import-status{font-size:13px;font-weight:600}
+@media(max-width:600px){.export-section{padding:0 14px 40px}}
+</style>
+
+<div class="export-section">
+  <div class="export-card">
+    <div class="export-title">Exportar & Importar Time</div>
+    <div class="export-row">
+      <button class="export-btn json" onclick="exportJSON()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar .json
+      </button>
+      <button class="export-btn txt" onclick="exportTXT()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar .txt
+      </button>
+      <button class="export-btn md" onclick="exportMD()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar .md
+      </button>
+      <div class="export-divider"></div>
+      <button class="export-btn import-btn" onclick="importJSON()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importar .json
+      </button>
+      <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(this)"/>
+      <span id="import-status"></span>
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:14px">
+      Exporte em .json (reimportavel), .txt (texto simples) ou .md (Markdown para GitHub/Notion).
+      Importe um .json exportado anteriormente para restaurar o time completo com os movesets.
+    </p>
+  </div>
+</div>
+
 </body>
 </html>
