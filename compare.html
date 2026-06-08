@@ -124,6 +124,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
   .stat-compare-row{grid-template-columns:1fr 80px 1fr}
   .moves-compare,.def-compare{grid-template-columns:1fr}
 }
+/* radar responsive */
+@media(max-width:860px){
+  .radar-stats-grid{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
@@ -240,6 +244,70 @@ function renderSelectedBadge(side, p) {
     </div>`
 }
 
+/* ── Radar chart ── */
+function buildRadarSVG(aStats, bStats, statOrder) {
+  const N = statOrder.length
+  const cx = 160, cy = 155, R = 110
+  const MAX_VAL = 255
+  const COLOR_A = 'rgba(239,83,80,0.55)'
+  const COLOR_B = 'rgba(66,165,245,0.55)'
+  const STROKE_A = '#ef5350'
+  const STROKE_B = '#42a5f5'
+
+  function polar(angle, r) {
+    const rad = (angle - 90) * Math.PI / 180
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
+  }
+
+  // Grid rings
+  const rings = [0.2,0.4,0.6,0.8,1].map(f => {
+    const pts = statOrder.map((_,i) => polar(i*(360/N), R*f))
+    return `<polygon points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/>`
+  }).join('')
+
+  // Axes
+  const axes = statOrder.map((_,i) => {
+    const p = polar(i*(360/N), R)
+    return `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="rgba(255,255,255,.1)" stroke-width="1"/>`
+  }).join('')
+
+  // Labels
+  const labels = statOrder.map((stat,i) => {
+    const angle = i*(360/N)
+    const p = polar(angle, R+22)
+    const short = {hp:'HP',attack:'ATK',defense:'DEF','special-attack':'SpA','special-defense':'SpD',speed:'SPD'}
+    return `<text x="${p.x}" y="${p.y}" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Space Grotesk,sans-serif">${short[stat]||stat}</text>`
+  }).join('')
+
+  function polyPath(stats, color, stroke) {
+    const pts = statOrder.map((stat,i) => {
+      const val = stats[stat] || 0
+      const r = (val/MAX_VAL) * R
+      return polar(i*(360/N), r)
+    })
+    const path = pts.map((p,i)=>(i===0?'M':'L')+p.x.toFixed(2)+','+p.y.toFixed(2)).join(' ')+'Z'
+    return `<path d="${path}" fill="${color}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>`
+  }
+
+  // Dots
+  function dots(stats, stroke) {
+    return statOrder.map((stat,i) => {
+      const val = stats[stat]||0
+      const r = (val/MAX_VAL)*R
+      const p = polar(i*(360/N),r)
+      return `<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="3.5" fill="${stroke}" stroke="#111" stroke-width="1.5"/>`
+    }).join('')
+  }
+
+  return `<svg viewBox="0 0 320 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:320px;display:block;margin:0 auto">
+    ${rings}${axes}
+    ${polyPath(aStats,COLOR_A,STROKE_A)}
+    ${polyPath(bStats,COLOR_B,STROKE_B)}
+    ${dots(aStats,STROKE_A)}${dots(bStats,STROKE_B)}
+    ${labels}
+  </svg>`
+}
+
 function renderComparison() {
   const a = selected.a, b = selected.b
   const result = document.getElementById('compare-result')
@@ -252,22 +320,30 @@ function renderComparison() {
 
   const statsHTML = STAT_ORDER.map(stat => {
     const av = aStats[stat]||0, bv = bStats[stat]||0
-    const max = Math.max(av, bv, 1)
     const aW = Math.round(av/255*100), bW = Math.round(bv/255*100)
-    const aColor = STAT_COLORS[stat]||'#888', bColor = STAT_COLORS[stat]||'#888'
     const winner = av>bv?'winner-left':bv>av?'winner-right':''
     return `<div class="stat-compare-row ${winner}">
       <div class="bar-left">
-        <span class="stat-num">${av}</span>
-        <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${aW}%;background:${aColor};float:right"></div></div>
+        <span class="stat-num" style="color:#ef5350">${av}</span>
+        <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${aW}%;background:#ef5350;float:right"></div></div>
       </div>
       <div class="stat-name-center">${STAT_LABELS[stat]||stat}</div>
       <div class="bar-right">
-        <span class="stat-num">${bv}</span>
-        <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${bW}%;background:${bColor}"></div></div>
+        <span class="stat-num" style="color:#42a5f5">${bv}</span>
+        <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${bW}%;background:#42a5f5"></div></div>
       </div>
     </div>`
   }).join('')
+
+  const radarSVG = buildRadarSVG(aStats, bStats, STAT_ORDER)
+  const legend = `<div style="display:flex;gap:20px;justify-content:center;margin-top:12px">
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600">
+      <span style="width:12px;height:12px;border-radius:2px;background:#ef5350;display:inline-block"></span>${cap(a.name)}
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600">
+      <span style="width:12px;height:12px;border-radius:2px;background:#42a5f5;display:inline-block"></span>${cap(b.name)}
+    </div>
+  </div>`
 
   // Moves
   const aMoves = new Set(a.moves.map(m=>m.move.name))
@@ -275,44 +351,91 @@ function renderComparison() {
   const shared = [...aMoves].filter(m=>bMoves.has(m))
   const aOnly = [...aMoves].filter(m=>!bMoves.has(m)).slice(0,30)
   const bOnly = [...bMoves].filter(m=>!aMoves.has(m)).slice(0,30)
-
   const movesHTML = `<div class="moves-compare">
     <div class="moves-col">
-      <h4>${cap(a.name)} (${aMoves.size} moves)</h4>
+      <h4 style="color:#ef5350">${cap(a.name)} (${aMoves.size} moves)</h4>
       <div class="moves-col-list">
         ${shared.map(m=>`<div class="move-compare-chip move-shared">⚡ ${slug(m)}</div>`).join('')}
         ${aOnly.map(m=>`<div class="move-compare-chip">${slug(m)}</div>`).join('')}
       </div>
     </div>
     <div class="moves-col">
-      <h4>${cap(b.name)} (${bMoves.size} moves)</h4>
+      <h4 style="color:#42a5f5">${cap(b.name)} (${bMoves.size} moves)</h4>
       <div class="moves-col-list">
         ${shared.map(m=>`<div class="move-compare-chip move-shared">⚡ ${slug(m)}</div>`).join('')}
         ${bOnly.map(m=>`<div class="move-compare-chip">${slug(m)}</div>`).join('')}
       </div>
     </div>
   </div>
-  <p style="font-size:12px;color:var(--text-muted);margin-top:10px">⚡ Marcados em amarelo = moves em comum (${shared.length})</p>`
+  <p style="font-size:12px;color:var(--text-muted);margin-top:10px">⚡ Em amarelo = moves em comum (${shared.length})</p>`
 
-  // Defenses
+  // Defenses with totals
   const aTypes = a.types.map(t=>t.type.name)
   const bTypes = b.types.map(t=>t.type.name)
-  const defHTML = `<div class="def-compare">
-    <div class="def-col"><h4>${cap(a.name)}</h4><div class="def-grid">${renderDefGrid(aTypes)}</div></div>
-    <div class="def-col"><h4>${cap(b.name)}</h4><div class="def-grid">${renderDefGrid(bTypes)}</div></div>
+  const aEff = calcDefenses(aTypes), bEff = calcDefenses(bTypes)
+  const aWeakCount = ALL_TYPES.filter(t=>aEff[t]>1).length
+  const bWeakCount = ALL_TYPES.filter(t=>bEff[t]>1).length
+  const aResCount  = ALL_TYPES.filter(t=>aEff[t]<1&&aEff[t]>0).length
+  const bResCount  = ALL_TYPES.filter(t=>bEff[t]<1&&bEff[t]>0).length
+  const aImmCount  = ALL_TYPES.filter(t=>aEff[t]===0).length
+  const bImmCount  = ALL_TYPES.filter(t=>bEff[t]===0).length
+
+  function defTotals(weakC, resC, immC, color) {
+    return `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <span style="padding:4px 12px;border-radius:6px;background:rgba(255,89,89,.12);border:1px solid rgba(255,89,89,.25);font-size:12px;font-weight:700;color:#ff5959">⬇ ${weakC} fraquezas</span>
+      <span style="padding:4px 12px;border-radius:6px;background:rgba(155,204,80,.12);border:1px solid rgba(155,204,80,.25);font-size:12px;font-weight:700;color:#9bcc50">⬆ ${resC} resistências</span>
+      ${immC?`<span style="padding:4px 12px;border-radius:6px;background:rgba(136,136,136,.12);border:1px solid rgba(136,136,136,.25);font-size:12px;font-weight:700;color:#aaa">✕ ${immC} imunidades</span>`:''}
+    </div>`
+  }
+
+  const defHTML = `
+    <div class="def-compare">
+      <div class="def-col">
+        <h4 style="color:#ef5350;margin-bottom:10px">${cap(a.name)}</h4>
+        ${defTotals(aWeakCount,aResCount,aImmCount,'#ef5350')}
+        <div class="def-grid">${renderDefGrid(aTypes)}</div>
+      </div>
+      <div class="def-col">
+        <h4 style="color:#42a5f5;margin-bottom:10px">${cap(b.name)}</h4>
+        ${defTotals(bWeakCount,bResCount,bImmCount,'#42a5f5')}
+        <div class="def-grid">${renderDefGrid(bTypes)}</div>
+      </div>
+    </div>`
+
+  // Abilities
+  const aAbils = a.abilities.map(ab=>`<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#1e1e24;border:1px solid rgba(239,83,80,.2);border-radius:6px;font-size:12px;font-weight:600;color:#ef5350">${cap(slug(ab.ability.name))}${ab.is_hidden?'<span style="font-size:9px;color:#aaa">(oculta)</span>':''}</div>`).join('')
+  const bAbils = b.abilities.map(ab=>`<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#1e1e24;border:1px solid rgba(66,165,245,.2);border-radius:6px;font-size:12px;font-weight:600;color:#42a5f5">${cap(slug(ab.ability.name))}${ab.is_hidden?'<span style="font-size:9px;color:#aaa">(oculta)</span>':''}</div>`).join('')
+  const abilsHTML = `<div class="moves-compare">
+    <div class="moves-col"><h4 style="color:#ef5350;margin-bottom:10px">${cap(a.name)}</h4><div style="display:flex;flex-direction:column;gap:8px">${aAbils}</div></div>
+    <div class="moves-col"><h4 style="color:#42a5f5;margin-bottom:10px">${cap(b.name)}</h4><div style="display:flex;flex-direction:column;gap:8px">${bAbils}</div></div>
   </div>`
 
   result.innerHTML = `
     <div class="compare-section">
       <div class="compare-section-title">⚔️ Base Stats</div>
       <div class="compare-body">
-        ${statsHTML}
-        <div class="stat-total-row">
-          <div class="total-left"><div class="total-num" style="color:${aTotal>bTotal?'var(--accent)':'var(--text-primary)'}">${aTotal}</div><div class="total-label">${cap(a.name)}</div></div>
-          <div style="text-align:center;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Total</div>
-          <div class="total-right"><div class="total-num" style="color:${bTotal>aTotal?'var(--accent)':'var(--text-primary)'}">${bTotal}</div><div class="total-label">${cap(b.name)}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start">
+          <div>
+            ${statsHTML}
+            <div class="stat-total-row">
+              <div class="total-left">
+                <div class="total-num" style="color:#ef5350">${aTotal}</div>
+                <div class="total-label">${cap(a.name)}</div>
+              </div>
+              <div style="text-align:center;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">BST Total</div>
+              <div class="total-right">
+                <div class="total-num" style="color:#42a5f5">${bTotal}</div>
+                <div class="total-label">${cap(b.name)}</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding-top:8px">${radarSVG}${legend}</div>
         </div>
       </div>
+    </div>
+    <div class="compare-section">
+      <div class="compare-section-title">💡 Habilidades</div>
+      <div class="compare-body">${abilsHTML}</div>
     </div>
     <div class="compare-section">
       <div class="compare-section-title">🎯 Moves</div>

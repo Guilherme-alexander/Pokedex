@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/shared.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>Pokébolas — Pokédex</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--text-primary);min-height:100vh}
+.page-wrap{max-width:1200px;margin:0 auto;padding:36px 32px 80px}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.page-title{font-family:'Exo 2',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-1px}
+.page-title span{color:var(--accent)}
+.stats-bar{display:flex;gap:12px;flex-wrap:wrap}
+.stat-pill{padding:6px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text-muted)}
+.stat-pill strong{color:var(--text-primary);margin-left:4px}
+
+#load-progress-wrap{display:none;flex-direction:column;gap:6px;margin-bottom:16px}
+#load-progress-label{font-size:12px;color:var(--text-muted)}
+.progress-track{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+#load-progress-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:360px}
+.search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:#555;fill:none;pointer-events:none}
+.search-input{width:100%;height:42px;padding:0 16px 0 42px;background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(--accent-border)}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px}
+.filter-btn{height:34px;padding:0 13px;border-radius:20px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
+.filter-btn:hover{background:rgba(255,255,255,.05);color:var(--text-primary)}
+.filter-btn.active{background:var(--accent-faint);color:var(--accent);border-color:var(--accent-border)}
+
+/* ── Ball grid — bigger cards than items ── */
+.balls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+
+.ball-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .15s,background .15s,border-color .15s;
+}
+/* Pokéball ring glow behind card */
+.ball-card::before{
+  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:100px;height:100px;border-radius:50%;
+  background:var(--ball-color,#ea3b3b);opacity:.08;pointer-events:none;
+}
+.ball-card:hover{transform:translateY(-4px);background:var(--bg-inner);border-color:var(--border-mid)}
+.ball-card:hover::before{opacity:.16}
+
+.ball-img-wrap{width:88px;height:88px;display:flex;align-items:center;justify-content:center;position:relative}
+.ball-img{width:72px;height:72px;image-rendering:pixelated;filter:drop-shadow(0 6px 16px rgba(0,0,0,.5));transition:transform .25s}
+.ball-card:hover .ball-img{transform:scale(1.12) rotate(-8deg)}
+.ball-img-placeholder{font-size:48px;opacity:.3}
+
+.ball-name{font-family:'Exo 2',sans-serif;font-size:16px;font-weight:800;text-transform:capitalize;text-align:center;color:var(--text-primary)}
+.ball-catch-rate{font-size:12px;color:var(--text-muted);text-align:center}
+.ball-cost{font-size:11px;color:var(--text-dim)}
+.ball-effect-preview{font-size:12px;color:var(--text-muted);text-align:center;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ball-detail-btn{margin-top:auto;width:100%;height:32px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.ball-detail-btn:hover{background:var(--accent-faint);border-color:var(--accent-border);color:var(--accent)}
+
+/* ── Modal ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--bg-card);border:1px solid rgba(255,255,255,.13);border-radius:20px;max-width:520px;width:100%;padding:28px;position:relative;max-height:85vh;overflow-y:auto}
+.modal-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:var(--bg-inner);border:1px solid var(--border);color:#777;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.modal-close:hover{color:var(--text-primary)}
+
+.modal-ball-hero{
+  display:flex;align-items:center;gap:20px;margin-bottom:22px;
+  padding:20px;background:var(--bg-inner);border-radius:12px;border:1px solid var(--border);
+}
+.modal-ball-img{width:88px;height:88px;image-rendering:pixelated;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5));animation:floatBall 3s ease-in-out infinite}
+@keyframes floatBall{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.modal-ball-info h2{font-family:'Exo 2',sans-serif;font-size:1.5rem;font-weight:900;text-transform:capitalize;margin-bottom:8px}
+.modal-badges{display:flex;gap:6px;flex-wrap:wrap}
+.modal-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 9px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted)}
+.modal-desc{font-size:13px;color:var(--text-muted);line-height:1.7;padding:14px;background:var(--bg-inner);border-radius:8px;border:1px solid var(--border);margin-bottom:10px}
+.modal-effect{font-size:13px;color:var(--text-muted);line-height:1.7;padding:14px;background:var(--bg-inner);border-radius:8px;border:1px solid rgba(232,255,71,.2);margin-bottom:10px}
+.modal-section-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin:14px 0 8px}
+
+.catch-rate-bar{margin-top:16px}
+.catch-rate-label{font-size:12px;color:var(--text-muted);margin-bottom:8px;display:flex;justify-content:space-between}
+.catch-rate-track{height:8px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.catch-rate-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#9bcc50,#ffbd00,#ff5959);transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+.trivia-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.trivia-box{background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.trivia-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.trivia-value{font-size:16px;font-weight:800;color:var(--text-primary)}
+
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:80px;color:var(--text-muted);font-size:14px;grid-column:1/-1}
+.no-results{grid-column:1/-1;text-align:center;padding:60px;color:var(--text-dim);font-size:14px}
+
+/* Ball color mapping for glow */
+.ball-pokeball{--ball-color:#ea3b3b}
+.ball-great{--ball-color:#1E90FF}
+.ball-ultra{--ball-color:#ffbd00}
+.ball-master{--ball-color:#b97fc9}
+.ball-safari{--ball-color:#9bcc50}
+.ball-net{--ball-color:#51c4e7}
+.ball-dive{--ball-color:#5aadff}
+.ball-nest{--ball-color:#9bcc50}
+.ball-repeat{--ball-color:#ffbd00}
+.ball-timer{--ball-color:#f5ac78}
+.ball-luxury{--ball-color:#ffbd00}
+.ball-premier{--ball-color:#f0f0f0}
+.ball-dusk{--ball-color:#7b62a3}
+.ball-heal{--ball-color:#e27a9d}
+.ball-quick{--ball-color:#ffbd00}
+.ball-default{--ball-color:#888}
+
+@media(max-width:600px){.page-wrap{padding:20px 14px 60px}.balls-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.trivia-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="header-logo">Poké<span>dex</span></a>
+  <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons</a>
+    <a href="moves.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves</a>
+    <a href="items.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Itens</a>
+    <a href="pokeballs.html" class="nav-link active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3"/></svg>Pokébolas</a>
+    <a href="compare.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar</a>
+    <a href="team.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <h1 class="page-title">Pokéball<span>dex</span></h1>
+    <div class="stats-bar" id="stats-bar"><div class="stat-pill">Carregando...</div></div>
+  </div>
+
+  <div id="load-progress-wrap">
+    <div id="load-progress-label">Carregando Pokébolas...</div>
+    <div class="progress-track"><div id="load-progress-fill"></div></div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="ball-search" placeholder="Buscar por nome..." oninput="applyFilters()" autocomplete="off"/>
+    </div>
+    <div class="filter-row" id="cat-filters">
+      <button class="filter-btn active" data-cat="all" onclick="setCat('all',this)">Todas</button>
+      <button class="filter-btn" data-cat="standard-balls" onclick="setCat('standard-balls',this)">⭐ Padrão</button>
+      <button class="filter-btn" data-cat="special-balls" onclick="setCat('special-balls',this)">✨ Especial</button>
+      <button class="filter-btn" data-cat="apricorn-balls" onclick="setCat('apricorn-balls',this)">🌰 Apricorn</button>
+    </div>
+  </div>
+
+  <div class="balls-grid" id="balls-grid">
+    <div class="page-loading"><div class="pokeball-loader"></div><p>Carregando Pokébolas...</p></div>
+  </div>
+</div>
+
+<div id="ball-modal" style="display:none"></div>
+
+<script src="js/shared.js"></script>
+<script>
+/* Hardcoded catch rate multipliers / trivia (not in API) */
+const BALL_DATA = {
+  'poke-ball':        {mult:'1×',cond:'Sempre',color:'#ea3b3b'},
+  'great-ball':       {mult:'1.5×',cond:'Sempre',color:'#1E90FF'},
+  'ultra-ball':       {mult:'2×',cond:'Sempre',color:'#ffbd00'},
+  'master-ball':      {mult:'∞',cond:'Captura garantida',color:'#b97fc9'},
+  'safari-ball':      {mult:'1.5×',cond:'Safari Zone',color:'#9bcc50'},
+  'net-ball':         {mult:'3.5×',cond:'Water/Bug types',color:'#51c4e7'},
+  'dive-ball':        {mult:'3.5×',cond:'Pescando ou na água',color:'#5aadff'},
+  'nest-ball':        {mult:'Var.',cond:'Nível baixo',color:'#9bcc50'},
+  'repeat-ball':      {mult:'3.5×',cond:'Já capturado',color:'#ffbd00'},
+  'timer-ball':       {mult:'Var.',cond:'Aumenta por turno',color:'#f5ac78'},
+  'luxury-ball':      {mult:'1×',cond:'Mais amizade',color:'#c9952a'},
+  'premier-ball':     {mult:'1×',cond:'Igual Pokébola',color:'#f0f0f0'},
+  'dusk-ball':        {mult:'3.5×',cond:'Noite / Cavernas',color:'#7b62a3'},
+  'heal-ball':        {mult:'1×',cond:'Cura ao capturar',color:'#e27a9d'},
+  'quick-ball':       {mult:'5×',cond:'1º turno',color:'#ffbd00'},
+  'cherish-ball':     {mult:'1×',cond:'Eventos oficiais',color:'#ea3b3b'},
+  'fast-ball':        {mult:'4×',cond:'Velocidade ≥100',color:'#fff'},
+  'level-ball':       {mult:'Var.',cond:'Nível vs oponente',color:'#f5ac78'},
+  'lure-ball':        {mult:'4×',cond:'Pescando',color:'#1E90FF'},
+  'heavy-ball':       {mult:'Var.',cond:'Peso do Pokémon',color:'#555'},
+  'love-ball':        {mult:'8×',cond:'Mesmo espécie, gênero oposto',color:'#e27a9d'},
+  'friend-ball':      {mult:'1×',cond:'Alta amizade inicial',color:'#9bcc50'},
+  'moon-ball':        {mult:'4×',cond:'Evolui com Moon Stone',color:'#b97fc9'},
+  'sport-ball':       {mult:'1.5×',cond:'Bug Catching Contest',color:'#ffbd00'},
+  'dream-ball':       {mult:'255×',cond:'Dormindo',color:'#dc439d'},
+  'beast-ball':       {mult:'5×',cond:'Ultra Beasts',color:'#51c4e7'},
+  'strange-ball':     {mult:'1×',cond:'Especial',color:'#888'},
+  'origin-ball':      {mult:'∞',cond:'Legendários Hisui',color:'#9988ff'},
+  'jet-ball':         {mult:'Var.',cond:'Especial',color:'#aaa'},
+  'gigaton-ball':     {mult:'Var.',cond:'Especial',color:'#888'},
+  'leaden-ball':      {mult:'Var.',cond:'Especial',color:'#888'},
+  'wing-ball':        {mult:'Var.',cond:'Especial',color:'#aaa'},
+}
+
+const BALL_CATS = new Set(['standard-balls','apricorn-balls','special-balls','pokeballs'])
+
+let allBalls    = []
+let allItems    = []
+let itemUrls    = []
+let loadedCount = 0
+let isLoading   = false
+let activeCat   = 'all'
+let ballCache   = {}
+const CHUNK     = 25
+
+async function loadBalls() {
+  setProgress(true, 0)
+  const list = await apiFetch('https://pokeapi.co/api/v2/item?limit=2000')
+  itemUrls = list.results
+  await fetchNextChunk()
+}
+
+async function fetchNextChunk() {
+  if (isLoading || loadedCount >= itemUrls.length) { setProgress(false,100); return }
+  isLoading = true
+  const slice = itemUrls.slice(loadedCount, loadedCount + CHUNK)
+  const results = await Promise.allSettled(slice.map(i => apiFetch(i.url)))
+  results.forEach(r => {
+    if (r.status==='fulfilled' && r.value?.id) {
+      allItems.push(r.value)
+      if (BALL_CATS.has(r.value.category?.name)) allBalls.push(r.value)
+    }
+  })
+  loadedCount += slice.length
+  const pct = Math.round(loadedCount / itemUrls.length * 100)
+  setProgress(true, pct, loadedCount, itemUrls.length)
+  applyFilters()
+  updateStatsBar()
+  isLoading = false
+  if (loadedCount < itemUrls.length) setTimeout(fetchNextChunk, 40)
+  else setProgress(false, 100)
+}
+
+function setProgress(visible, pct, loaded, total) {
+  const wrap  = document.getElementById('load-progress-wrap')
+  const fill  = document.getElementById('load-progress-fill')
+  const label = document.getElementById('load-progress-label')
+  wrap.style.display = visible ? 'flex' : 'none'
+  fill.style.width = pct + '%'
+  if (loaded !== undefined) label.textContent = `Carregando itens... ${loaded}/${total} (${pct}%) — ${allBalls.length} Pokébolas encontradas`
+}
+
+function setCat(cat, btn) {
+  activeCat = cat
+  document.querySelectorAll('#cat-filters .filter-btn').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  applyFilters()
+}
+
+function applyFilters() {
+  const q = document.getElementById('ball-search').value.toLowerCase().trim()
+  let filtered = allBalls
+  if (activeCat !== 'all') filtered = filtered.filter(b => b.category?.name === activeCat)
+  if (q) filtered = filtered.filter(b => b.name.includes(q) || slug(b.name).includes(q))
+  renderBalls(filtered)
+}
+
+function updateStatsBar() {
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-pill">Total <strong>${allBalls.length}</strong></div>
+    <div class="stat-pill">Padrão <strong>${allBalls.filter(b=>b.category?.name==='standard-balls').length}</strong></div>
+    <div class="stat-pill">Especial <strong>${allBalls.filter(b=>b.category?.name==='special-balls').length}</strong></div>
+    <div class="stat-pill">Apricorn <strong>${allBalls.filter(b=>b.category?.name==='apricorn-balls').length}</strong></div>
+  `
+}
+
+function getBallColor(name) { return BALL_DATA[name]?.color || '#888' }
+
+function renderBalls(balls) {
+  const grid = document.getElementById('balls-grid')
+  if (!balls.length && loadedCount === 0) { grid.innerHTML=`<div class="page-loading"><div class="pokeball-loader"></div><p>Carregando...</p></div>`; return }
+  if (!balls.length) { grid.innerHTML=`<div class="no-results">Nenhuma Pokébola encontrada.</div>`; return }
+
+  grid.innerHTML = balls.map(ball => {
+    const sprite = ball.sprites?.default
+    const data   = BALL_DATA[ball.name] || {}
+    const color  = data.color || '#888'
+    const shortEffect = ball.effect_entries?.find(e=>e.language.name==='en')?.short_effect || ''
+    const imgHTML = sprite
+      ? `<img class="ball-img" src="${sprite}" alt="${ball.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ball-img-placeholder" style="display:none">⚪</div>`
+      : `<div class="ball-img-placeholder">⚪</div>`
+    return `
+    <div class="ball-card" style="--ball-color:${color}" onclick="openBallDetail(${ball.id})">
+      <div class="ball-img-wrap">${imgHTML}</div>
+      <div class="ball-name">${slug(ball.name)}</div>
+      ${data.mult ? `<div class="ball-catch-rate">Taxa: <strong style="color:${color}">${data.mult}</strong></div>` : ''}
+      ${data.cond ? `<div class="ball-cost">${data.cond}</div>` : ''}
+      ${shortEffect ? `<div class="ball-effect-preview">${shortEffect}</div>` : ''}
+      <button class="ball-detail-btn" onclick="event.stopPropagation();openBallDetail(${ball.id})">Ver detalhes →</button>
+    </div>`
+  }).join('')
+}
+
+async function openBallDetail(id) {
+  const modal = document.getElementById('ball-modal')
+  modal.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px'
+  modal.innerHTML=`<div class="modal-box"><div style="display:flex;align-items:center;justify-content:center;padding:48px"><div class="pokeball-loader"></div></div><button class="modal-close" onclick="closeBallModal()">✕</button></div>`
+
+  let ball = allBalls.find(b=>b.id===id)
+  if (!ball) { try { ball = await apiFetch(`https://pokeapi.co/api/v2/item/${id}`) } catch(e){return} }
+
+  const sprite  = ball.sprites?.default
+  const data    = BALL_DATA[ball.name] || {}
+  const color   = data.color || '#888'
+  const desc    = ball.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\n|\f/g,' ') || ''
+  const effect  = ball.effect_entries?.find(e=>e.language.name==='en')?.effect || ''
+
+  // Catch rate bar: parse multiplier to 0-100 scale
+  const multMap = {'1×':14,'1.5×':20,'2×':27,'3.5×':47,'4×':53,'5×':66,'8×':100,'255×':100,'∞':100,'Var.':35}
+  const catchPct = multMap[data.mult] || 14
+
+  const imgHTML = sprite
+    ? `<img class="modal-ball-img" src="${sprite}" alt="${ball.name}" style="--ball-glow:${color}">`
+    : `<div style="font-size:56px;opacity:.3">⚪</div>`
+
+  modal.querySelector('.modal-box').innerHTML = `
+    <button class="modal-close" onclick="closeBallModal()">✕</button>
+    <div class="modal-ball-hero">
+      ${imgHTML}
+      <div class="modal-ball-info">
+        <h2>${slug(ball.name)}</h2>
+        <div class="modal-badges">
+          <span class="modal-badge">${cap(slug(ball.category?.name||''))}</span>
+          ${ball.cost ? `<span class="modal-badge">₽${ball.cost.toLocaleString()}</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    ${data.mult ? `<div class="catch-rate-bar">
+      <div class="catch-rate-label">
+        <span>Taxa de Captura</span>
+        <span style="color:${color};font-weight:800">${data.mult}</span>
+      </div>
+      <div class="catch-rate-track"><div class="catch-rate-fill" style="width:${catchPct}%"></div></div>
+      ${data.cond ? `<p style="font-size:12px;color:var(--text-dim);margin-top:6px">Condição: ${data.cond}</p>` : ''}
+    </div>` : ''}
+
+    <div class="trivia-grid" style="margin-top:16px">
+      <div class="trivia-box"><div class="trivia-label">Multiplicador</div><div class="trivia-value" style="color:${color}">${data.mult||'—'}</div></div>
+      <div class="trivia-box"><div class="trivia-label">Custo</div><div class="trivia-value">${ball.cost ? '₽'+ball.cost.toLocaleString() : '—'}</div></div>
+      <div class="trivia-box"><div class="trivia-label">Fling Poder</div><div class="trivia-value">${ball.fling_power??'—'}</div></div>
+      <div class="trivia-box"><div class="trivia-label">Categoria</div><div class="trivia-value" style="font-size:13px">${cap(slug(ball.category?.name||'—'))}</div></div>
+    </div>
+
+    ${desc ? `<div class="modal-section-label">Descrição</div><div class="modal-desc">${desc}</div>` : ''}
+    ${effect && effect !== desc ? `<div class="modal-section-label">Efeito completo</div><div class="modal-effect">${effect}</div>` : ''}
+  `
+}
+
+function closeBallModal() { document.getElementById('ball-modal').style.display='none' }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeBallModal() })
+
+loadBalls()
+</script>
+</body>
+</html>

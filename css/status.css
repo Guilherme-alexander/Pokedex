@@ -399,3 +399,5 @@ body{
   .def-grid{grid-template-columns:repeat(auto-fill,minmax(40px,1fr))}
   .mega-cards-row{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 }
+
+.move-pill{cursor:pointer!important}

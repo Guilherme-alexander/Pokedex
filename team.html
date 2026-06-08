@@ -189,24 +189,32 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
   <nav class="header-nav">
-    <a href="index.html" class="nav-link">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
-    </a>
-    <a href="moves.html" class="nav-link">
-      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
-    </a>
-    <a href="compare.html" class="nav-link">
-      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
-    </a>
-    <a href="team.html" class="nav-link active">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
-    </a>
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons</a>
+    <a href="moves.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves</a>
+    <a href="items.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Itens</a>
+    <a href="pokeballs.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3"/></svg>Pokébolas</a>
+    <a href="evolution.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>Evolução</a>
+    <a href="berries.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3"/></svg>Berries</a>
+    <a href="medicine.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 21v-4"/><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Medicina</a>
+    <a href="others.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Outros</a>
+    <a href="compare.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar</a>
+    <a href="team.html" class="nav-link active"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time</a>
   </nav>
 </header>
 
 <div class="page-wrap">
   <h1 class="page-title">Montar <span>Time</span></h1>
   <p class="page-sub">Escolha até 6 Pokémons e defina o moveset de cada um para ver a análise do time.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;margin-top:0">
+    <button class="export-btn" style="border-color:rgba(232,255,71,.35);color:var(--accent);background:rgba(232,255,71,.08);height:40px;padding:0 18px;display:inline-flex;align-items:center;gap:8px" onclick="randomizeTeam()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+      Randomizar Time
+    </button>
+    <button class="export-btn" style="border-color:rgba(234,59,59,.3);color:#ea3b3b;background:rgba(234,59,59,.07);height:40px;padding:0 18px;display:inline-flex;align-items:center;gap:8px" onclick="clearTeam()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      Limpar Time
+    </button>
+  </div>
 
   <div class="team-grid" id="team-grid"></div>
 
@@ -239,9 +247,11 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
 </div>
 
 <script src="js/shared.js"></script>
+<script src="js/itemCategories.js"></script>
 <script>
 let pokemonList = []
-let team = Array(6).fill(null)  // [{data, moves:[null,null,null,null]}]
+let team = Array(6).fill(null)  // [{data, moves:[null,null,null,null], item:null}]
+const slugJS = s => s ? s.replace(/-/g,' ') : ''
 let addingSlot = -1
 
 const STAT_ORDER = ['hp','attack','defense','special-attack','special-defense','speed']
@@ -276,6 +286,9 @@ function renderGrid() {
         <div class="slot-types">${renderTypeBadges(types)}</div>
         <button class="slot-moves-btn" onclick="openMovesetModal(${i})">
           ${movesLabel ? `${movesLabel}/4 moves` : 'Definir moves'}
+        </button>
+        <button class="slot-moves-btn slot-item-btn" style="border-color:rgba(232,255,71,.2);color:${slot.item?'var(--accent)':'var(--text-dim)'}" onclick="openItemPickerModal(${i})">
+          ${slot.item ? '🎒 '+slugJS(slot.item.name) : '+ Item'}
         </button>
       </div>`
   }).join('')
@@ -548,7 +561,8 @@ function buildExportData() {
         types: p.types.map(t=>t.type.name),
         stats: Object.fromEntries(p.stats.map(s=>[s.stat.name, s.base_stat])),
         abilities: p.abilities.map(a=>({ name:a.ability.name, isHidden:a.is_hidden })),
-        moves: slot.moves.filter(Boolean)
+        moves: slot.moves.filter(Boolean),
+        item: slot.item ? slot.item.name : null
       }
     })
   }
@@ -586,6 +600,7 @@ function exportTXT() {
     lines.push('    Stats    : ' + Object.entries(p.stats).map(([k,v])=> (SL[k]||k) + ' ' + v).join(' | '))
     lines.push('    Habilidades: ' + p.abilities.map(a=>a.name+(a.isHidden?' (oculta)':'')).join(', '))
     if (p.moves.length) lines.push('    Moveset  : ' + p.moves.map(m=>m.replace(/-/g,' ')).join(' | '))
+    if (p.item) lines.push('    Item     : ' + p.item.replace(/-/g,' '))
     lines.push('')
   })
   const avgBST = Math.round(data.team.reduce((s,p)=>s+Object.values(p.stats).reduce((a,v)=>a+v,0),0)/data.team.length)
@@ -615,6 +630,7 @@ function exportMD() {
     lines.push('**BST Total:** ' + bst + '  ')
     lines.push('**Habilidades:** ' + p.abilities.map(a=>a.name+(a.isHidden?' *(oculta)*':'')).join(', ') + '  ')
     if (p.moves.length) lines.push('**Moveset:** ' + p.moves.map(m=>'`'+m.replace(/-/g,' ')+'`').join(' | '))
+    if (p.item) lines.push('**Item Equipado:** `' + p.item.replace(/-/g,' ') + '`')
     lines.push('')
     lines.push('| Stat | Valor |')
     lines.push('|---|---|')
@@ -638,31 +654,236 @@ function importJSON() {
   document.getElementById('import-file-input').click()
 }
 
+/* Parse any supported format → [{id, moves}] */
+function parseImportText(text, filename) {
+  const ext = filename.split('.').pop().toLowerCase()
+
+  // JSON
+  if (ext === 'json') {
+    const data = JSON.parse(text)
+    if (!data.team || !Array.isArray(data.team)) throw new Error('JSON sem campo "team"')
+    return data.team.map(p => ({ id: p.id, moves: p.moves || [] }))
+  }
+
+  // TXT — look for lines like "[1] #006 charizard"
+  if (ext === 'txt') {
+    const entries = []
+    const lines = text.split('\n')
+    let current = null
+    for (const line of lines) {
+      const m = line.match(/^\[\d+\]\s+#(\d+)\s+(\S+)/)
+      if (m) {
+        if (current) entries.push(current)
+        current = { id: parseInt(m[1]), moves: [] }
+      }
+      if (current) {
+        const mvMatch = line.match(/Moveset\s*:\s*(.+)/)
+        if (mvMatch) {
+          current.moves = mvMatch[1].split('|').map(s=>s.trim().replace(/ /g,'-').toLowerCase()).filter(Boolean)
+        }
+      }
+    }
+    if (current) entries.push(current)
+    if (!entries.length) throw new Error('Nenhum Pokémon encontrado no .txt')
+    return entries
+  }
+
+  // MD — look for lines like "### 1. #006 Charizard"
+  if (ext === 'md') {
+    const entries = []
+    const lines = text.split('\n')
+    let current = null
+    for (const line of lines) {
+      const m = line.match(/^###\s+\d+\.\s+#(\d+)\s+(\S+)/)
+      if (m) {
+        if (current) entries.push(current)
+        current = { id: parseInt(m[1]), moves: [] }
+      }
+      if (current) {
+        const mvMatch = line.match(/\*\*Moveset:\*\*\s*(.+)/)
+        if (mvMatch) {
+          current.moves = mvMatch[1].replace(/`/g,'').split('|').map(s=>s.trim().replace(/ /g,'-').toLowerCase()).filter(Boolean)
+        }
+      }
+    }
+    if (current) entries.push(current)
+    if (!entries.length) throw new Error('Nenhum Pokémon encontrado no .md')
+    return entries
+  }
+
+  throw new Error('Formato não suportado: ' + ext)
+}
+
 async function handleImportFile(input) {
   const file = input.files[0]
   if (!file) return
   const statusEl = document.getElementById('import-status')
   try {
     const text = await file.text()
-    const data = JSON.parse(text)
-    if (!data.team || !Array.isArray(data.team)) throw new Error('Formato invalido')
+    const entries = parseImportText(text, file.name)
+    if (!entries.length) throw new Error('Nenhum Pokémon encontrado')
+
     team = Array(6).fill(null)
-    statusEl.textContent = 'Carregando dados dos Pokemons...'
+    statusEl.textContent = 'Carregando ' + entries.length + ' Pokémon(s)...'
     statusEl.style.color = 'var(--accent)'
-    await Promise.all(data.team.slice(0,6).map(async (p, i) => {
+
+    await Promise.all(entries.slice(0,6).map(async (p, i) => {
       const pokeData = await apiFetch('https://pokeapi.co/api/v2/pokemon/' + p.id)
-      team[i] = { data: pokeData, moves: (p.moves||[]).concat([null,null,null,null]).slice(0,4) }
+      team[i] = { data: pokeData, moves: (p.moves||[]).concat([null,null,null,null]).slice(0,4), item: p.item || null }
     }))
+
     renderGrid()
-    statusEl.textContent = 'Time importado com ' + data.team.length + ' Pokemon(s)!'
+    const fmt = file.name.split('.').pop().toUpperCase()
+    statusEl.textContent = '✓ Time importado do .'+fmt+' com '+entries.length+' Pokémon(s)!'
     statusEl.style.color = '#9bcc50'
-    setTimeout(() => statusEl.textContent = '', 3000)
+    setTimeout(() => statusEl.textContent = '', 3500)
   } catch(e) {
-    statusEl.textContent = 'Erro ao importar. Verifique o arquivo JSON.'
+    statusEl.textContent = '✗ Erro: ' + e.message
     statusEl.style.color = '#ff5959'
-    setTimeout(() => statusEl.textContent = '', 3000)
+    setTimeout(() => statusEl.textContent = '', 4000)
   }
   input.value = ''
+}
+
+/* ── Item picker modal ── */
+let itemPickerSlot = -1
+let itemList = []
+let itemListLoaded = false
+
+async function openItemPickerModal(i) {
+  itemPickerSlot = i
+  // lazy load item list
+  if (!itemListLoaded) {
+    try {
+      // Load all items then filter to battle-usable only
+      const list = await apiFetch('https://pokeapi.co/api/v2/item?limit=2100')
+      const ALLOWED = new Set([
+        'held-items','choice','effort-training','type-protection','in-a-pinch',
+        'other-held-items','training','vitamins','plates','species-specific',
+        'type-enhancement','stat-boosts','battle-items','pp-recovery',
+        'berries','berry-pockets','effort-drop','in-a-pinch','baking-only',
+        'scarves','healing','medicine','status-cures','revival'
+      ])
+      // Fetch in small batches to get category info
+      const results = await Promise.allSettled(
+        list.results.slice(0,500).map(i => apiFetch(i.url))
+      )
+      itemList = results
+        .filter(r => r.status==='fulfilled' && r.value?.id)
+        .map(r => r.value)
+        .filter(i => ALLOWED.has(i.category?.name))
+        .map(i => ({
+          name: i.name,
+          id: String(i.id),
+          sprite: i.sprites?.default || null,
+          cat: i.category?.name || ''
+        }))
+      itemListLoaded = true
+    } catch(e) {
+      // Fallback: curated competitive item list
+      const FALLBACK = [
+        'leftovers','choice-band','choice-specs','choice-scarf','life-orb',
+        'focus-sash','rocky-helmet','assault-vest','eviolite','black-sludge',
+        'lum-berry','sitrus-berry','salac-berry','liechi-berry','petaya-berry',
+        'weakness-policy','air-balloon','iron-ball','flame-orb','toxic-orb',
+        'power-herb','white-herb','mental-herb','red-card','eject-button',
+        'shed-shell','muscle-band','wise-glasses','expert-belt','quick-claw',
+        'rocky-helmet','safety-goggles','clear-amulet','loaded-dice',
+        'booster-energy','covert-cloak','mirror-herb','punching-glove',
+        'potion','super-potion','hyper-potion','max-potion','full-restore',
+        'antidote','burn-heal','ice-heal','awakening','full-heal','revive',
+        'ether','max-ether','elixir','max-elixir','x-attack','x-defense',
+        'x-speed','x-special','x-sp-def','x-accuracy','dire-hit','guard-spec'
+      ]
+      itemList = FALLBACK.map(n => ({name:n, id:null, sprite:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${n}.png`, cat:''}))
+      itemListLoaded = true
+    }
+  }
+
+  let bd = document.getElementById('item-picker-backdrop')
+  if (!bd) {
+    bd = document.createElement('div')
+    bd.id = 'item-picker-backdrop'
+    bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px'
+    bd.onclick = e => { if(e.target===bd) bd.remove() }
+    document.body.appendChild(bd)
+  }
+
+  const currentItem = team[itemPickerSlot]?.item
+
+  bd.innerHTML = `<div style="max-width:460px;width:100%;background:#18181c;border-radius:20px;border:1px solid rgba(255,255,255,.13);padding:24px;position:relative;max-height:80vh;display:flex;flex-direction:column;gap:14px">
+    <button onclick="document.getElementById('item-picker-backdrop').remove()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1e1e24;border:1px solid rgba(255,255,255,.08);color:#777;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="font-family:'Exo 2',sans-serif;font-size:1.1rem;font-weight:900;margin-bottom:4px">Escolher Item Equipado</div>
+    ${currentItem ? `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.25);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent)">
+      ${currentItem.sprite ? `<img src="${currentItem.sprite}" style="width:28px;height:28px;image-rendering:pixelated">` : '🎒'}
+      ${slugJS(currentItem.name)}
+      <button onclick="clearSlotItem()" style="margin-left:auto;font-size:11px;color:#ff5959;background:none;border:none;cursor:pointer;font-weight:700">Remover ✕</button>
+    </div>` : ''}
+    <div style="position:relative">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:#555;fill:none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="item-picker-search" type="text" placeholder="Buscar item..." oninput="filterItemPicker(this.value)"
+        style="width:100%;height:40px;padding:0 14px 0 38px;background:#1e1e24;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#f0f0f0;font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none" autocomplete="off"/>
+    </div>
+    <div id="item-picker-results" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;max-height:340px"></div>
+  </div>`
+
+  filterItemPicker('')
+}
+
+function filterItemPicker(q) {
+  const lower = q.toLowerCase().trim()
+  const results = lower
+    ? itemList.filter(i=>i.name.includes(lower)).slice(0,20)
+    : itemList.slice(0,30)
+  const el = document.getElementById('item-picker-results')
+  if (!el) return
+  el.innerHTML = results.map(item => {
+    const spriteUrl = item.sprite || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`
+    const catLabel = item.cat ? `<span style="font-size:10px;color:#555;margin-left:auto">${item.cat.replace(/-/g,' ')}</span>` : ''
+    return `<div onclick="selectSlotItem('${item.name}','${spriteUrl}')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#1e1e24;border:1px solid rgba(255,255,255,.08);border-radius:8px;cursor:pointer;transition:border-color .1s" onmouseover="this.style.borderColor='rgba(232,255,71,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+      <img src="${spriteUrl}" style="width:32px;height:32px;image-rendering:pixelated" onerror="this.style.display='none'">
+      <span style="font-size:13px;font-weight:500;text-transform:capitalize;color:#f0f0f0">${item.name.replace(/-/g,' ')}</span>
+      ${catLabel}
+    </div>`
+  }).join('')
+}
+
+function selectSlotItem(name, spriteUrl) {
+  if (itemPickerSlot < 0 || !team[itemPickerSlot]) return
+  team[itemPickerSlot].item = { name, sprite: spriteUrl }
+  document.getElementById('item-picker-backdrop')?.remove()
+  renderGrid()
+}
+
+function clearSlotItem() {
+  if (itemPickerSlot < 0 || !team[itemPickerSlot]) return
+  team[itemPickerSlot].item = null
+  document.getElementById('item-picker-backdrop')?.remove()
+  renderGrid()
+}
+
+/* ── Randomize & Clear ── */
+async function randomizeTeam() {
+  if (!pokemonList.length) return alert('Lista de Pokémons ainda carregando...')
+  team = Array(6).fill(null)
+  const shuffled = [...pokemonList].sort(()=>Math.random()-.5).slice(0,6)
+  const statusEl = document.getElementById('import-status')
+  if (statusEl) { statusEl.textContent = 'Gerando time aleatório...'; statusEl.style.color='var(--accent)' }
+  await Promise.all(shuffled.map(async (p, i) => {
+    try {
+      const data = await apiFetch('https://pokeapi.co/api/v2/pokemon/' + p.id)
+      team[i] = { data, moves: [null,null,null,null], item: null }
+    } catch(e) {}
+  }))
+  renderGrid()
+  if (statusEl) { statusEl.textContent = 'Time aleatório gerado!'; statusEl.style.color='#9bcc50'; setTimeout(()=>statusEl.textContent='',2500) }
+}
+
+function clearTeam() {
+  if (!team.some(Boolean)) return
+  if (!confirm('Limpar o time inteiro?')) return
+  team = Array(6).fill(null)
+  renderGrid()
 }
 
 init()
@@ -712,14 +933,13 @@ init()
       <div class="export-divider"></div>
       <button class="export-btn import-btn" onclick="importJSON()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Importar .json
+        Importar
       </button>
-      <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(this)"/>
+      <input type="file" id="import-file-input" accept=".json,.txt,.md" style="display:none" onchange="handleImportFile(this)"/>
       <span id="import-status"></span>
     </div>
     <p style="font-size:12px;color:var(--text-dim);margin-top:14px">
-      Exporte em .json (reimportavel), .txt (texto simples) ou .md (Markdown para GitHub/Notion).
-      Importe um .json exportado anteriormente para restaurar o time completo com os movesets.
+      Exporte em .json (reimportável), .txt ou .md. O botão <strong style="color:var(--text-primary)">Importar</strong> detecta automaticamente o formato (.json, .txt ou .md) e valida antes de carregar.
     </p>
   </div>
 </div>

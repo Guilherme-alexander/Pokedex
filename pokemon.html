@@ -181,7 +181,7 @@ function getEvoBranches(chain) {
       else if (d.trigger?.name === 'level-up')                   method = 'Nível up'
       else if (d.trigger?.name)                                   method = cap(slug(d.trigger.name))
     }
-    const cur = { name: node.species.name, url: node.species.url, method }
+    const cur = { name: node.species.name, url: node.species.url, method, rawDetail: d }
     const newPath = [...path, cur]
     if (!node.evolves_to.length) return [newPath]
     return node.evolves_to.flatMap(child => walk(child, newPath))
@@ -257,7 +257,7 @@ function renderMovesTab(tab) {
     `<button class="tab-btn${t.id===tab?' active':''}" onclick="renderMovesTab('${t.id}')">${t.label}</button>`
   ).join('')
   const movesHTML = filtered.length
-    ? filtered.map(m=>`<li class="move-pill">${slug(m.name)}</li>`).join('')
+    ? filtered.map(m=>`<li class="move-pill" onclick="openMoveDetailPokemon('${m.name}')">${slug(m.name)}</li>`).join('')
     : `<li class="move-empty">Nenhum move nesta categoria.</li>`
   document.querySelector('.moves-section').innerHTML = `
     <p class="section-title">Moves (${filtered.length} de ${allMoves.length})</p>
@@ -387,7 +387,7 @@ async function renderEvolutions(speciesUrl, activeVarietyIndex) {
         const isActive = info.id === getPokemonId()
         const arrow = i > 0
           ? `<div class="evo-arrow">
-               ${poke.method?`<span class="evo-method">${poke.method}</span>`:''}
+               ${poke.method ? buildEvoMethodHTML(poke.method, poke.rawDetail) : ''}
                <span class="evo-caret">→</span>
              </div>`
           : ''
@@ -419,6 +419,101 @@ async function renderEvolutions(speciesUrl, activeVarietyIndex) {
   } catch(e) {
     section.innerHTML = `<p class="section-title">Cadeia de Evolução</p><p class="def-subtitle">Não disponível.</p>`
   }
+}
+
+/* ═══════════════════════════════════════════
+   EVO METHOD WITH ITEM IMAGE
+═══════════════════════════════════════════ */
+const ITEM_SPRITE_URL = name => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${name}.png`
+
+function buildEvoMethodHTML(method, detail) {
+  let itemName = null
+  if (detail) {
+    if (detail.item?.name) itemName = detail.item.name
+    else if (detail.held_item?.name) itemName = detail.held_item.name
+    // known stone name → item slug map
+    const stoneMap = {
+      'fire stone':'fire-stone','water stone':'water-stone','thunder stone':'thunder-stone',
+      'leaf stone':'leaf-stone','moon stone':'moon-stone','sun stone':'sun-stone',
+      'shiny stone':'shiny-stone','dusk stone':'dusk-stone','dawn stone':'dawn-stone',
+      'ice stone':'ice-stone','oval stone':'oval-stone','link cable':'link-cable'
+    }
+    if (!itemName) {
+      const lower = method.toLowerCase()
+      for (const [k,v] of Object.entries(stoneMap)) {
+        if (lower.includes(k.split(' ')[0])) { itemName = v; break }
+      }
+    }
+  }
+  const imgHTML = itemName
+    ? `<img src="${ITEM_SPRITE_URL(itemName)}" alt="${itemName}"
+         style="width:24px;height:24px;image-rendering:pixelated;display:block;margin:0 auto 2px"
+         onerror="this.style.display='none'">`
+    : ''
+  return `<span class="evo-method">${imgHTML}${method}</span>`
+}
+
+/* ═══════════════════════════════════════════
+   MOVE DETAIL MODAL (from pokemon page)
+═══════════════════════════════════════════ */
+const MOVE_TYPE_EMOJIS_P = {fire:'🔥',water:'💧',grass:'🌿',electric:'⚡',ice:'❄️',fighting:'👊',poison:'☠️',ground:'🌍',flying:'🌬️',psychic:'🔮',bug:'🐛',rock:'🪨',ghost:'👻',dragon:'🐉',dark:'🌑',steel:'⚙️',fairy:'✨',normal:'⭐'}
+const CLASS_PT_P = {physical:'Físico',special:'Especial',status:'Status'}
+let moveCacheP = {}
+
+async function openMoveDetailPokemon(name) {
+  let backdrop = document.getElementById('move-detail-backdrop')
+  if (!backdrop) {
+    backdrop = document.createElement('div')
+    backdrop.id = 'move-detail-backdrop'
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px'
+    backdrop.onclick = e => { if(e.target===backdrop) backdrop.remove() }
+    document.body.appendChild(backdrop)
+  }
+  backdrop.innerHTML = `<div style="max-width:540px;width:100%;background:#18181c;border-radius:20px;border:1px solid rgba(255,255,255,.13);padding:28px;position:relative;max-height:82vh;overflow-y:auto">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px"><div class="pokeball-loader"></div></div>
+    <button onclick="document.getElementById('move-detail-backdrop').remove()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1e1e24;border:1px solid rgba(255,255,255,.08);color:#777;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+  </div>`
+
+  if (!moveCacheP[name]) {
+    try { moveCacheP[name] = await apiFetch(`https://pokeapi.co/api/v2/move/${name}`) } catch(e) { return }
+  }
+  const move = moveCacheP[name]
+  if (!move) return
+  const type = move.type?.name || 'normal'
+  const cls  = move.damage_class?.name || 'status'
+  const typeBg = TYPE_BG[type] || '#888'
+  const typeColor = TYPE_COLORS[type] || '#888'
+  const desc   = move.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\n|\f/g,' ') || ''
+  const effect = move.effect_entries?.find(e=>e.language.name==='en')?.short_effect?.replace(/\$effect_chance/g, move.effect_chance||'') || ''
+  const learners = (move.learned_by_pokemon||[]).slice(0,20).map(p=>{
+    const id=p.url.split('/').filter(Boolean).pop()
+    return `<a href="pokemon.html?id=${id}" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#1e1e24;border:1px solid rgba(255,255,255,.08);border-radius:6px;font-size:11px;color:#777;text-decoration:none;transition:color .1s" onmouseover="this.style.color='#e8ff47'" onmouseout="this.style.color='#777'">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" style="width:22px;height:22px;image-rendering:pixelated">${cap(p.name)}</a>`
+  }).join('')
+
+  backdrop.querySelector('div').innerHTML = `
+    <button onclick="document.getElementById('move-detail-backdrop').remove()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1e1e24;border:1px solid rgba(255,255,255,.08);color:#777;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px">
+      <div style="width:52px;height:52px;border-radius:12px;background:${typeBg}22;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${MOVE_TYPE_EMOJIS_P[type]||'⭐'}</div>
+      <div>
+        <div style="font-family:'Exo 2',sans-serif;font-size:1.4rem;font-weight:900;text-transform:capitalize;margin-bottom:6px">${slug(move.name)}</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <span class="type type-${type}">${type}</span>
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:rgba(245,172,120,.1);color:#f5ac78;border:1px solid rgba(245,172,120,.2)">${CLASS_PT_P[cls]||cls}</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      ${[['Poder',move.power||'—'],['Precisão',move.accuracy?move.accuracy+'%':'—'],['PP',move.pp||'—'],['Prioridade',move.priority??0],['Alvo',cap(slug(move.target?.name||'—'))],['Geração',cap(slug(move.generation?.name||'—')).replace('Generation-','Gen ')]].map(([l,v])=>`
+        <div style="background:#1e1e24;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">${l}</div>
+          <div style="font-size:17px;font-weight:800">${v}</div>
+        </div>`).join('')}
+    </div>
+    ${desc?`<div style="font-size:13px;color:#777;line-height:1.7;padding:14px;background:#1e1e24;border-radius:8px;border:1px solid rgba(255,255,255,.08);margin-bottom:10px">${desc}</div>`:''}
+    ${effect&&effect!==desc?`<div style="font-size:13px;color:#777;line-height:1.7;padding:14px;background:#1e1e24;border-radius:8px;border:1px solid ${typeColor}33;margin-bottom:10px">${effect}</div>`:''}
+    ${learners?`<div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:8px">Aprendido por</div><div style="display:flex;flex-wrap:wrap;gap:6px">${learners}</div>`:''}
+  `
 }
 
 /* ═══════════════════════════════════════════
