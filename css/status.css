@@ -401,3 +401,23 @@ body{
 }
 
 .move-pill{cursor:pointer!important}
+
+/* ── Mega Stone badge on mega card ── */
+.mega-stone-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+/* ── Z-Move card with crystal image ── */
+.zmove-card {
+  gap: 10px;
+}
+.zmove-card img {
+  flex-shrink: 0;
+}

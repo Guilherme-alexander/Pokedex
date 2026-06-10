@@ -17,18 +17,16 @@
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
   <nav class="header-nav">
-    <a href="index.html" class="nav-link active" data-page="pokedex">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons
-    </a>
-    <a href="moves.html" class="nav-link">
-      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves
-    </a>
-    <a href="compare.html" class="nav-link">
-      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar
-    </a>
-    <a href="team.html" class="nav-link">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time
-    </a>
+    <a href="index.html" class="nav-link active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons</a>
+    <a href="moves.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves</a>
+    <a href="items.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Itens</a>
+    <a href="pokeballs.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3"/></svg>Pokébolas</a>
+    <a href="evolution.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>Evolução</a>
+    <a href="berries.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3"/></svg>Berries</a>
+    <a href="medicine.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 21v-4"/><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Medicina</a>
+    <a href="others.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Outros</a>
+    <a href="compare.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>Comparar</a>
+    <a href="team.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Montar Time</a>
   </nav>
 </header>
 
@@ -268,16 +266,32 @@ function renderMovesTab(tab) {
 /* ═══════════════════════════════════════════
    RENDER: Z-MOVES
 ═══════════════════════════════════════════ */
+/* Z-Crystal item name per type (for sprite) */
+const Z_CRYSTAL_ITEM = {
+  normal:'normalium-z', fire:'firium-z', water:'waterium-z',
+  electric:'electrium-z', grass:'grassium-z', ice:'icium-z',
+  fighting:'fightinium-z', poison:'poisonium-z', ground:'groundium-z',
+  flying:'flyinium-z', psychic:'psychium-z', bug:'buginium-z',
+  rock:'rockium-z', ghost:'ghostium-z', dragon:'dragonium-z',
+  dark:'darkinium-z', steel:'steelium-z', fairy:'fairium-z'
+}
+const ITEM_SPRITE = name => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${name}.png`
+
 function renderZMoves(types) {
-  const zmoves = types.map(t => ({type:t, move:Z_MOVES[t]||null})).filter(z=>z.move)
+  const zmoves = types.map(t => ({type:t, move:Z_MOVES[t]||null, crystal:Z_CRYSTAL_ITEM[t]||null})).filter(z=>z.move)
   if (!zmoves.length) return ''
   const items = zmoves.map(z => `
     <div class="zmove-card">
+      ${z.crystal
+        ? `<img src="${ITEM_SPRITE(z.crystal)}" alt="${z.crystal}"
+             style="width:28px;height:28px;image-rendering:pixelated;flex-shrink:0"
+             onerror="this.style.display='none'">`
+        : ''}
       <span class="zmove-type-dot" style="background:${TYPE_COLORS[z.type]||'#888'}">${z.type}</span>
       <span class="zmove-name">${z.move}</span>
     </div>`).join('')
   return `<div class="zmoves-section">
-    <p class="section-title">Z-Moves</p>
+    <p class="section-title">Z-Moves & Z-Crystals</p>
     <div class="zmoves-list">${items}</div>
   </div>`
 }
@@ -321,19 +335,66 @@ async function renderAbilitiesSection(abilities) {
 ═══════════════════════════════════════════ */
 function renderFormSelector(varieties, activeIndex) {
   if (varieties.length <= 1) return ''
-  const btns = varieties.map((v, i) => `
-    <button class="form-btn${i===activeIndex?' active':''}"
-      onclick="switchForm(${i})"
-      title="${v.label}">
-      ${v.isMega || v.isGmax ? `<span class="form-special-dot"></span>` : ''}
+  const btns = varieties.map((v, i) => {
+    // mini mega stone icon in form button
+    const stoneIcon = v.isMega
+      ? (() => {
+          const url = getMegaStoneSprite(v.name)
+          return url ? `<img src="${url}" style="width:16px;height:16px;image-rendering:pixelated;flex-shrink:0" onerror="this.style.display='none'" alt="">` : `<span class="form-special-dot"></span>`
+        })()
+      : v.isGmax ? `<span class="form-special-dot" style="background:#9988ff;box-shadow:0 0 6px #9988ff"></span>` : ''
+    return `<button class="form-btn${i===activeIndex?' active':''}" onclick="switchForm(${i})" title="${v.label}">
+      ${stoneIcon}
       ${v.label}
-    </button>`).join('')
+    </button>`
+  }).join('')
   return `<div class="form-selector">${btns}</div>`
 }
 
 /* ═══════════════════════════════════════════
    RENDER: MEGA CARDS in Evolution section
 ═══════════════════════════════════════════ */
+/* Mega Stone item name per pokemon (for sprite) */
+const MEGA_STONE_MAP = {
+  'charizard-mega-x':'charizardite-x','charizard-mega-y':'charizardite-y',
+  'venusaur-mega':'venusaurite','blastoise-mega':'blastoisinite',
+  'alakazam-mega':'alakazite','gengar-mega':'gengarite',
+  'kangaskhan-mega':'kangaskhanite','pinsir-mega':'pinsirite',
+  'gyarados-mega':'gyaradosite','aerodactyl-mega':'aerodactylite',
+  'mewtwo-mega-x':'mewtwonite-x','mewtwo-mega-y':'mewtwonite-y',
+  'ampharos-mega':'ampharosite','scizor-mega':'scizorite',
+  'heracross-mega':'heracronite','houndoom-mega':'houndoominite',
+  'tyranitar-mega':'tyranitarite','blaziken-mega':'blazikenite',
+  'gardevoir-mega':'gardevoirite','mawile-mega':'mawilite',
+  'aggron-mega':'aggronite','medicham-mega':'medichamite',
+  'manectric-mega':'manectite','banette-mega':'banettite',
+  'absol-mega':'absolite','latios-mega':'latiosite',
+  'latias-mega':'latiasite','garchomp-mega':'garchompite',
+  'lucario-mega':'lucarionite','abomasnow-mega':'abomasite',
+  'beedrill-mega':'beedrillite','pidgeot-mega':'pidgeotite',
+  'slowbro-mega':'slowbronite','steelix-mega':'steelixite',
+  'sceptile-mega':'sceptilite','swampert-mega':'swampertite',
+  'sableye-mega':'sablenite','sharpedo-mega':'sharpedonite',
+  'camerupt-mega':'cameruptite','altaria-mega':'altarianite',
+  'glalie-mega':'glalitite','salamence-mega':'salamencite',
+  'metagross-mega':'metagrossite','latias-mega':'latiasite',
+  'rayquaza-mega':'','lopunny-mega':'lopunnite',
+  'gallade-mega':'galladite','audino-mega':'audinite',
+  'diancie-mega':'diancite','swampert-mega':'swampertite',
+  'sceptile-mega':'sceptilite','altaria-mega':'altarianite',
+  'glalie-mega':'glalitite','camerupt-mega':'cameruptite',
+}
+
+function getMegaStoneSprite(varName) {
+  // Try exact match first
+  if (MEGA_STONE_MAP[varName]) return ITEM_SPRITE(MEGA_STONE_MAP[varName])
+  // Try suffix match: pokemon-mega → pokemonite
+  const baseName = varName.replace(/-mega(-[xy])?$/, '')
+  const suffix = varName.includes('-mega-x') ? '-x' : varName.includes('-mega-y') ? '-y' : ''
+  const stone = baseName + 'ite' + suffix
+  return ITEM_SPRITE(stone)
+}
+
 function renderMegaCards(varieties, activeVarietyIndex) {
   const specials = varieties.filter((v,i) => i > 0 && (v.isMega || v.isGmax))
   if (!specials.length) return ''
@@ -345,6 +406,17 @@ function renderMegaCards(varieties, activeVarietyIndex) {
     const artworkUrl = v.pokemonData?.sprites?.other?.['official-artwork']?.front_default || sprite
     const isActive = realIdx === activeVarietyIndex
     const typeBadges = types.map(t=>`<span class="evo-type-dot" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`).join('')
+
+    // Mega Stone sprite
+    const stoneUrl = v.isMega ? getMegaStoneSprite(v.name) : null
+    const stoneHTML = stoneUrl
+      ? `<div class="mega-stone-wrap" title="Mega Stone">
+          <img src="${stoneUrl}" alt="mega stone"
+            style="width:22px;height:22px;image-rendering:pixelated"
+            onerror="this.parentElement.style.display='none'">
+         </div>`
+      : ''
+
     return `
       <div class="mega-card${isActive?' mega-active':''}" onclick="switchForm(${realIdx})" title="Ver ${v.label}">
         <div class="mega-card-img-wrap">
@@ -354,6 +426,7 @@ function renderMegaCards(varieties, activeVarietyIndex) {
         </div>
         <span class="mega-card-label">${v.label}</span>
         <div class="mega-card-types">${typeBadges}</div>
+        ${stoneHTML}
       </div>`
   }).join('')
 
@@ -406,6 +479,26 @@ async function renderEvolutions(speciesUrl, activeVarietyIndex) {
     // Mega cards section
     const megaHTML = renderMegaCards(allVarieties, activeVarietyIndex)
 
+    // Mega Stones list
+    const megaVariants = allVarieties.filter((v,i) => i > 0 && v.isMega)
+    const stoneListHTML = megaVariants.length ? (() => {
+      const stoneCards = megaVariants.map(v => {
+        const stoneUrl = getMegaStoneSprite(v.name)
+        const stoneName = v.name.replace(/-mega(-[xy])?$/, '') + 'ite' + (v.name.endsWith('-x') ? ' X' : v.name.endsWith('-y') ? ' Y' : '')
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(255,255,255,.2)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+          <img src="${stoneUrl}" alt="${stoneName}" style="width:32px;height:32px;image-rendering:pixelated;flex-shrink:0" onerror="this.style.display='none'">
+          <div>
+            <div style="font-size:13px;font-weight:700;text-transform:capitalize;color:var(--text-primary)">${stoneName}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Usar em ${cap(v.name.split('-mega')[0])}</div>
+          </div>
+        </div>`
+      }).join('')
+      return `<div style="margin-top:22px">
+        <p class="section-title" style="margin-bottom:12px">Mega Stones</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">${stoneCards}</div>
+      </div>`
+    })() : ''
+
     section.innerHTML = `
       <p class="section-title">Cadeia de Evolução</p>
       <div class="evo-container">${branchesHTML}</div>
@@ -414,7 +507,8 @@ async function renderEvolutions(speciesUrl, activeVarietyIndex) {
           <p class="section-title" style="margin-top:24px">Formas Especiais & Mega Evoluções</p>
           <p class="mega-section-sub">Clique para ver stats, tipos e habilidades</p>
         </div>
-        ${megaHTML}` : ''}
+        ${megaHTML}
+        ${stoneListHTML}` : ''}
     `
   } catch(e) {
     section.innerHTML = `<p class="section-title">Cadeia de Evolução</p><p class="def-subtitle">Não disponível.</p>`

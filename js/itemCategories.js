@@ -1,117 +1,109 @@
 /* ═══════════════════════════════════════════════════════
-   POKEAPI ITEM CATEGORY MAP
-   Source: https://pokeapi.co/api/v2/item-category?limit=100
-   Each key = category.name from API
-   Each value = which page/group it belongs to
+   POKEAPI ITEM CATEGORY MAP — Complete & Corrected
+   Source: https://pokeapi.co/api/v2/item-category
+   All 50+ categories mapped to page groups
 ═══════════════════════════════════════════════════════ */
 
-// ── BATTLE ITEMS page (items.html) ──────────────────────
+// ── BATTLE / HELD ITEMS (items.html) ────────────────────
+// Includes: toxic-orb, flame-orb, jewels, gems, memories, incense, bad held items
 const CAT_BATTLE = new Set([
-  'held-items',         // generic held items (life-orb, focus-sash, etc)
-  'choice',             // choice band/scarf/specs
-  'effort-training',    // macho-brace, power-items
-  'effort-drop',        // PP-reducing items
-  'type-protection',    // type-enhancing held items (charcoal, mystic-water)
-  'in-a-pinch',         // pinch berries as held (kept also in berries page)
-  'other-held-items',   // miscellaneous holdable
-  'training',           // vitamins, PP-ups, feathers
-  'vitamins',           // calcium, iron, etc
-  'plates',             // arceus type plates
-  'scarves',            // contest scarves (still holdable)
-  'species-specific',   // thick-club, light-ball, lucky-punch
-  'type-enhancement',   // charcoal, miracle-seed (alias)
-  'stat-boosts',        // x-attack, x-speed, etc (battle items used in-battle)
-  'battle-items',       // generic battle items
-  'pp-recovery',        // ether, elixir
-  'revival',            // revive, max-revive (battle bag)
-  'flutes',             // blue/white/yellow flute
-  'healing',            // potions in battle
+  'held-items',        // Life Orb, Focus Sash, Rocky Helmet…
+  'choice',            // Choice Band, Scarf, Specs
+  'effort-training',   // Power Items, Macho Brace
+  'bad-held-items',    // Toxic Orb, Flame Orb, Lagging Tail, Sticky Barb, Ring Target
+  'bad-items',         // alias for bad held items
+  'type-protection',   // Type-resist berries + Shuca/Occa/Yache
+  'type-enhancement',  // Charcoal, Mystic Water, Miracle Seed
+  'stat-boosts',       // X-Attack, X-Speed, Guard Spec
+  'training',          // HP Up, Protein, Carbos, Calcium…
+  'vitamins',          // Calcium, Iron, etc.
+  'effort-drop',       // Pomeg Berry and EV-reducing items
+  'plates',            // Arceus plates (Flame Plate, Splash Plate…)
+  'memories',          // Silvally type memories
+  'species-specific',  // Thick Club, Light Ball, Lucky Punch, Leek
+  'scarves',           // Contest Scarves (holdable stat items)
+  'flutes',            // Azure Flute, Blue Flute (in-battle use)
+  'incense',           // Rock Incense, Sea Incense, Lax Incense (holdable)
+  'jewels',            // Fire Gem, Water Gem, Normal Gem… (consumable in battle)
+  'nature-mints',      // Mint items that change stat distribution
+  'other-held-items',  // Misc holdable
 ])
 
-// ── MEDICINE / STATUS page (medicine.html) ──────────────
+// ── MEDICINE / STATUS (medicine.html) ───────────────────
 const CAT_MEDICINE = new Set([
-  'medicine',           // potions, antidotes, full heal
-  'status-cures',       // antidote, burn heal, ice heal, awakening, parlyz heal
-  'picky-healing',      // gold/silver/pearl items that restore
-  'miracle-shooter',    // miracle shooter items
+  'medicine',          // Potion, Super Potion, Hyper Potion, Max Potion, Full Restore
+  'status-cures',      // Antidote, Burn Heal, Ice Heal, Awakening, Parlyz Heal, Full Heal
+  'pp-recovery',       // Ether, Max Ether, Elixir, Max Elixir, PP Up, PP Max
+  'revival',           // Revive, Max Revive
+  'healing',           // Full Heal (in-battle)
+  'picky-healing',     // Gold/Silver/Pearl healing items
+  'miracle-shooter',   // Miracle Shooter items (Gen V)
 ])
 
-// ── EVOLUTION page (evolution.html) ─────────────────────
+// ── EVOLUTION (evolution.html) ──────────────────────────
 const CAT_EVOLUTION = new Set([
-  'evolution',          // fire-stone, water-stone, dawn-stone, etc
+  'evolution',         // Fire Stone, Water Stone, Dawn Stone, Dragon Scale…
 ])
 
-// ── BERRIES page (berries.html) ─────────────────────────
+// ── BERRIES (berries.html) ──────────────────────────────
 const CAT_BERRIES = new Set([
-  'berries',
-  'berry-pockets',
-  'effort-drop',        // also in berries (pomeg, etc)
-  'in-a-pinch',         // salac, petaya, etc
-  'baking-only',        // poffin ingredients
-  'type-protection',    // shuca/yache/occa berries (overlap with battle — show on both)
+  'berries',           // All standard berries
+  'in-a-pinch',        // Salac, Petaya, Liechi, Apicot, Lansat, Starf, Micle, Custap
+  'baking-only',       // Poffin ingredients (Enigma Berry, Rabuta Berry…)
 ])
 
-// ── OTHERS page (others.html) ───────────────────────────
-const CAT_OTHERS = new Set([
-  'collectibles',
-  'spelunking',
-  'loot',
-  'apricorn-box',
-  'data-cards',
-  'jewels',
-  'miracle-shooter',
-  'all-mail',
-  'bad-held-items',
-  'repels',
-  'mulch',
-  'catching-bonus',
-  'dex-completion',
-  'incense',
-  'gameplay',
-  'plot-advancement',
-  'unused',
-  'all-machines',       // TMs/HMs — put here
-  'contest-costumes',
-  'fishing-rod',
-  'event-items',
-  'curry-ingredients',
-  'sandwich-ingredients',
-])
-
-// ── POKÉBOLAS page (pokeballs.html) ─────────────────────
+// ── POKÉBOLAS (pokeballs.html) ──────────────────────────
 const CAT_BALLS = new Set([
   'standard-balls',
   'special-balls',
   'apricorn-balls',
   'pokeballs',
-  'ultra-balls',        // alias
 ])
 
-// ── MEGA / Z — skip (shown in pokemon.html) ─────────────
+// ── SKIP — shown inside pokemon.html ───────────────────
 const CAT_SKIP = new Set([
-  'mega-stones',
-  'z-crystals',
+  'mega-stones',       // Charizardite X, Gardevoirite… → pokemon.html
+  'z-crystals',        // Firium Z, Waterium Z…        → pokemon.html
 ])
 
-/* Helper: given a category name, return the page key */
+// ── OTHERS (others.html) — everything else ─────────────
+const CAT_OTHERS = new Set([
+  'collectibles', 'spelunking', 'loot', 'all-mail', 'apricorn-box',
+  'data-cards', 'dex-completion', 'all-machines', 'event-items',
+  'gameplay', 'plot-advancement', 'unused', 'mulch', 'catching-bonus',
+  'dynamax-crystals', 'species-candies', 'nature-mints', 'curry-ingredients',
+  'tera-shard', 'sandwich-ingredients', 'tm-materials', 'picnic', 'other',
+])
+
+/** Return which page this category belongs to */
 function itemPageGroup(catName) {
-  if (!catName) return 'others'
-  if (CAT_SKIP.has(catName))      return 'skip'
-  if (CAT_BALLS.has(catName))     return 'balls'
-  if (CAT_EVOLUTION.has(catName)) return 'evolution'
-  if (CAT_MEDICINE.has(catName))  return 'medicine'
-  if (CAT_BERRIES.has(catName))   return 'berries'
-  if (CAT_BATTLE.has(catName))    return 'battle'
+  if (!catName)                 return 'others'
+  if (CAT_SKIP.has(catName))   return 'skip'
+  if (CAT_BALLS.has(catName))  return 'balls'
+  if (CAT_EVO_CATS(catName))   return 'evolution'
+  if (CAT_MED_CATS(catName))   return 'medicine'
+  if (CAT_BERRY_CATS(catName)) return 'berries'
+  if (CAT_BAT_CATS(catName))   return 'battle'
   return 'others'
 }
+// helpers to avoid Set naming collision below
+function CAT_EVO_CATS(c) { return CAT_EVOLUTION.has(c) }
+function CAT_MED_CATS(c) { return CAT_MEDICINE.has(c) }
+function CAT_BERRY_CATS(c){ return CAT_BERRIES.has(c) }
+function CAT_BAT_CATS(c)  { return CAT_BATTLE.has(c) }
 
-/* Battle-usable items (for team.html item picker) */
+/** Items allowed in team item picker (usable in battle) */
 const CAT_TEAM_ALLOWED = new Set([
-  'held-items','choice','effort-training','type-protection','in-a-pinch',
-  'other-held-items','training','vitamins','plates','species-specific',
-  'type-enhancement','stat-boosts','battle-items','pp-recovery','revival',
-  'berries','berry-pockets','effort-drop','baking-only','scarves',
-  'healing','medicine','status-cures',
+  // Held items
+  'held-items','choice','bad-held-items','bad-items','type-protection',
+  'type-enhancement','plates','memories','species-specific','scarves',
+  'incense','jewels','nature-mints',
+  // Consumables in battle
+  'in-a-pinch','berries','baking-only',
+  // Battle use
+  'stat-boosts','training','vitamins','effort-training','effort-drop','flutes',
+  // Medicine used in battle
+  'medicine','status-cures','pp-recovery','revival','healing','picky-healing',
 ])
 
 function isTeamAllowed(catName) {

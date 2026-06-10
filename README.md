@@ -55,7 +55,8 @@ O projeto foi **inteiramente reescrito** do zero: jQuery removido, código migra
 | 🧬 **Cadeia de Evolução** | Todos os estágios com método (nível, troca, amizade, pedra…) e múltiplos galhos |
 | 🪨 **Imagem do item de evolução** | Sprites de pedras e itens (Fire Stone, Dawn Stone, etc.) exibidos na seta da cadeia |
 | 💡 **Habilidades** | Nome, descrição e badge de habilidade oculta |
-| 🌀 **Z-Moves** | Z-Moves disponíveis baseados nos tipos do Pokémon |
+| 🌀 **Z-Moves + Z-Crystals** | Z-Moves com imagem da Z-Crystal correspondente (Firium Z, Waterium Z…) |
+| 🪨 **Mega Stones** | Imagem da Mega Stone no card de forma, no seletor e lista "Mega Stones necessárias" na seção de evolução |
 | 🎯 **Moves com abas** | Level Up / TM-HM / Ovo / Tutor / Todos |
 | 📋 **Modal de move** | Clicar em qualquer move abre modal com poder, precisão, PP, efeito e Pokémons que aprendem |
 | 🛡️ **Fraquezas & Resistências** | Tabela completa 18 tipos, atualiza ao trocar de forma |
@@ -69,6 +70,21 @@ O projeto foi **inteiramente reescrito** do zero: jQuery removido, código migra
 | 🎯 **Filtro por classe** | Físico / Especial / Status |
 | ✨ **Filtro Z-Move** | Ver só Z-Moves ou só moves normais |
 | 📋 **Modal de detalhe** | Poder, precisão, PP, prioridade, alvo, geração, descrição, efeito e lista de Pokémons que aprendem |
+
+### Item Pages — 7 páginas separadas por categoria
+
+| Página | Conteúdo | Categorias da PokéAPI |
+|---|---|---|
+| `items.html` | Held Items, Choice, Bad Held, Gems/Jewels, Plates, Memories, Incenso, Mints | `held-items`, `choice`, `bad-held-items`, `jewels`, `plates`, `memories`, `incense`, `nature-mints`… |
+| `pokeballs.html` | Todas as Pokébolas com taxa de captura e multiplicador | `standard-balls`, `special-balls`, `apricorn-balls` |
+| `evolution.html` | Pedras e itens de evolução | `evolution` |
+| `berries.html` | Todas as Berries (comuns, pinch, poffin) | `berries`, `in-a-pinch`, `baking-only` |
+| `medicine.html` | Poções, antídotos, curas de status, PP, Revive | `medicine`, `status-cures`, `pp-recovery`, `revival`, `healing` |
+| `others.html` | TMs/HMs, colecionáveis, itens de jogo, Dynamax | `all-machines`, `collectibles`, `event-items`, `dynamax-crystals`… |
+
+Todas as páginas de itens usam **chunk loading de 25 em 25** com barra de progresso, filtros por subcategoria, busca em tempo real e modal de detalhe completo.
+
+> **Mega Stones e Z-Crystals** são exibidos diretamente na `pokemon.html` — no seletor de formas e na seção de evolução.
 
 ### 4. `compare.html` — Comparar
 | Feature | Descrição |

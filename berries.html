@@ -8,67 +8,67 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
   <title>berries — Pokédex</title>
 <style>
-
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--text-primary);min-height:100vh}
 .page-wrap{max-width:1400px;margin:0 auto;padding:36px 32px 80px}
-.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
 .page-title{font-family:'Exo 2',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-1px}
 .page-title span{color:var(--accent)}
-.stats-bar{display:flex;gap:10px;flex-wrap:wrap}
+.stats-bar{display:flex;gap:8px;flex-wrap:wrap}
 .stat-pill{padding:5px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text-muted)}
 .stat-pill strong{color:var(--text-primary);margin-left:4px}
-#load-progress-wrap{display:none;flex-direction:column;gap:6px;margin-bottom:14px}
+#load-progress-wrap{display:none;flex-direction:column;gap:5px;margin-bottom:14px}
 #load-progress-label{font-size:12px;color:var(--text-muted)}
 .progress-track{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
 #load-progress-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s}
-.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:center}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:flex-start}
 .search-wrap{position:relative;flex:1;min-width:180px;max-width:360px}
-.search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:#555;fill:none;pointer-events:none}
-.search-input{width:100%;height:42px;padding:0 14px 0 42px;background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:#555;fill:none;pointer-events:none}
+.search-input{width:100%;height:42px;padding:0 14px 0 40px;background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
 .search-input:focus{border-color:var(--accent-border)}
-.filter-row{display:flex;flex-wrap:wrap;gap:6px}
-.filter-btn{height:34px;padding:0 12px;border-radius:20px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
+.filter-col{display:flex;flex-direction:column;gap:6px}
+.filter-row{display:flex;flex-wrap:wrap;gap:5px}
+.filter-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim)}
+.filter-btn{height:32px;padding:0 11px;border-radius:20px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
 .filter-btn:hover{background:rgba(255,255,255,.05);color:var(--text-primary)}
 .filter-btn.active{background:var(--accent-faint);color:var(--accent);border-color:var(--accent-border)}
 .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px}
-.item-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 14px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .15s,background .15s,border-color .15s;position:relative;overflow:hidden}
-.item-card::before{content:'';position:absolute;top:-20px;right:-20px;width:60px;height:60px;border-radius:50%;background:var(--accent);opacity:.04;pointer-events:none}
+.item-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .15s,background .15s,border-color .15s;position:relative;overflow:hidden}
+.item-card::before{content:'';position:absolute;top:-18px;right:-18px;width:56px;height:56px;border-radius:50%;background:var(--accent);opacity:.04;pointer-events:none}
 .item-card:hover{transform:translateY(-3px);background:var(--bg-inner);border-color:var(--border-mid)}
 .item-img-wrap{width:64px;height:64px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid var(--border)}
-.item-img{width:48px;height:48px;image-rendering:pixelated;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
+.item-img{width:48px;height:48px;image-rendering:pixelated;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
 .item-name{font-size:13px;font-weight:600;text-transform:capitalize;color:var(--text-primary);text-align:center;line-height:1.3}
-.item-cat-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text-muted)}
+.item-cat-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text-muted)}
 .item-cost{font-size:11px;color:var(--text-dim)}
 .item-effect-preview{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .item-detail-btn{margin-top:auto;width:100%;height:30px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .item-detail-btn:hover{background:var(--accent-faint);border-color:var(--accent-border);color:var(--accent)}
 .page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:80px;color:var(--text-muted);font-size:14px;grid-column:1/-1}
 .no-results{grid-column:1/-1;text-align:center;padding:60px;color:var(--text-dim);font-size:14px}
-.modal-backdrop-item{position:fixed;inset:0;background:rgba(0,0,0,.77);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.77);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal-box{background:var(--bg-card);border:1px solid rgba(255,255,255,.13);border-radius:20px;max-width:520px;width:100%;padding:26px;position:relative;max-height:85vh;overflow-y:auto}
-.modal-close{position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:50%;background:var(--bg-inner);border:1px solid var(--border);color:#777;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:color .15s}
-.modal-close:hover{color:var(--text-primary)}
-.modal-hero{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-.modal-img-wrap{width:80px;height:80px;background:rgba(255,255,255,.05);border-radius:14px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.modal-img{width:64px;height:64px;image-rendering:pixelated;filter:drop-shadow(0 3px 10px rgba(0,0,0,.4))}
-.modal-title{font-family:'Exo 2',sans-serif;font-size:1.3rem;font-weight:900;text-transform:capitalize;margin-bottom:6px}
-.modal-badges{display:flex;gap:6px;flex-wrap:wrap}
-.modal-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 9px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted)}
-.modal-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.mcl{position:absolute;top:13px;right:13px;width:30px;height:30px;border-radius:50%;background:var(--bg-inner);border:1px solid var(--border);color:#777;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.mcl:hover{color:var(--text-primary)}
+.mhero{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.mimg-wrap{width:80px;height:80px;background:rgba(255,255,255,.05);border-radius:14px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mimg{width:64px;height:64px;image-rendering:pixelated;filter:drop-shadow(0 3px 10px rgba(0,0,0,.4))}
+.mtitle{font-family:'Exo 2',sans-serif;font-size:1.25rem;font-weight:900;text-transform:capitalize;margin-bottom:6px}
+.mbadges{display:flex;gap:6px;flex-wrap:wrap}
+.mbadge{font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 9px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted)}
+.mstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
 .msb{background:var(--bg-inner);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
 .msb-l{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .msb-v{font-size:15px;font-weight:800;color:var(--text-primary)}
-.modal-desc{font-size:13px;color:var(--text-muted);line-height:1.7;padding:13px;background:var(--bg-inner);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
-.modal-sec{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin:12px 0 8px}
+.mdesc{font-size:13px;color:var(--text-muted);line-height:1.7;padding:13px;background:var(--bg-inner);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
+.msec{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin:12px 0 8px}
 .held-grid{display:flex;flex-wrap:wrap;gap:7px;max-height:150px;overflow-y:auto}
-.held-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:var(--bg-inner);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:border-color .15s,color .15s}
+.held-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:var(--bg-inner);border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--text-muted);text-decoration:none;transition:border-color .15s,color .15s}
 .held-chip:hover{border-color:var(--accent-border);color:var(--accent)}
 .held-chip img{width:26px;height:26px;image-rendering:pixelated}
-.attr-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.attr-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .attr-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(157,183,245,.1);color:#9db7f5;border:1px solid rgba(157,183,245,.2)}
-@media(max-width:600px){.page-wrap{padding:20px 14px 60px}.items-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}.modal-stats-grid{grid-template-columns:1fr 1fr}}
-
+@media(max-width:600px){.page-wrap{padding:20px 14px 60px}.items-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}.mstats{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -78,7 +78,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
   <button class="header-menu-btn" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
-    <nav class="header-nav">
+  <nav class="header-nav">
     <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/></svg>Pokémons</a>
     <a href="moves.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Moves</a>
     <a href="items.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Itens</a>
@@ -108,13 +108,14 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
       <svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" class="search-input" id="item-search" placeholder="Buscar por nome..." oninput="applyFilters()" autocomplete="off"/>
     </div>
-    <div class="filter-row" id="main-filters">
-      <button class="filter-btn active" onclick="setFilter('all',this,'main')">Todas</button>
-      <button class="filter-btn" onclick="setFilter('berries',this,'sub')">🍒 Comuns</button>
-      <button class="filter-btn" onclick="setFilter('in-a-pinch',this,'sub')">⚡ Pinch</button>
-      <button class="filter-btn" onclick="setFilter('effort-drop',this,'sub')">📊 Esforço</button>
-      <button class="filter-btn" onclick="setFilter('baking-only',this,'sub')">🍰 Poffin</button>
+    <div class="filter-col">
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setCat('all',this)">Todas</button>
+      <button class="filter-btn" onclick="setCat('berries',this)">🍒 Comuns</button>
+      <button class="filter-btn" onclick="setCat('in-a-pinch',this)">⚡ Pinch</button>
+      <button class="filter-btn" onclick="setCat('baking-only',this)">🍰 Poffin</button>
       
+      </div>
     </div>
   </div>
 
@@ -126,142 +127,158 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--tex
 <div id="item-modal" style="display:none"></div>
 
 <script src="js/shared.js"></script>
-<script src="js/itemCategories.js"></script>
 <script>
 
 const CHUNK = 25
 let allItems = [], itemUrls = [], loadedCount = 0, isLoading = false, itemCache = {}
-let activeFilter = 'all', activeSub = 'all'
+let activeCat = 'all'
 
 async function loadItems() {
-  setProgress(true,0)
+  setProgress(true, 0)
   const list = await apiFetch('https://pokeapi.co/api/v2/item?limit=2100')
   itemUrls = list.results
   await fetchNextChunk()
 }
 
 async function fetchNextChunk() {
-  if (isLoading || loadedCount >= itemUrls.length) { setProgress(false,100); return }
+  if (isLoading || loadedCount >= itemUrls.length) { setProgress(false, 100); return }
   isLoading = true
   const slice = itemUrls.slice(loadedCount, loadedCount + CHUNK)
   const res = await Promise.allSettled(slice.map(i => apiFetch(i.url)))
-  res.forEach(r => { if (r.status==='fulfilled' && r.value?.id) allItems.push(r.value) })
+  res.forEach(r => { if (r.status === 'fulfilled' && r.value?.id) allItems.push(r.value) })
   loadedCount += slice.length
-  const pct = Math.round(loadedCount/itemUrls.length*100)
+  const pct = Math.round(loadedCount / itemUrls.length * 100)
   setProgress(true, pct, loadedCount, itemUrls.length)
   applyFilters()
   updateStatsBar()
   isLoading = false
   if (loadedCount < itemUrls.length) setTimeout(fetchNextChunk, 40)
-  else setProgress(false,100)
+  else setProgress(false, 100)
 }
 
-function setProgress(v,pct,loaded,total) {
-  const w=document.getElementById('load-progress-wrap'), f=document.getElementById('load-progress-fill'), l=document.getElementById('load-progress-label')
-  w.style.display=v?'flex':'none'; f.style.width=pct+'%'
-  if(loaded!==undefined) l.textContent=`Carregando... ${loaded}/${total} (${pct}%)`
+function setProgress(v, pct, loaded, total) {
+  const w = document.getElementById('load-progress-wrap')
+  const f = document.getElementById('load-progress-fill')
+  const l = document.getElementById('load-progress-label')
+  w.style.display = v ? 'flex' : 'none'
+  f.style.width = pct + '%'
+  if (loaded !== undefined) l.textContent = `Carregando... ${loaded}/${total} (${pct}%) — ${pageItems().length} itens nesta aba`
 }
 
-function setFilter(val,btn,group) {
-  if(group==='main'){activeFilter=val;document.querySelectorAll('#main-filters .filter-btn').forEach(b=>b.classList.remove('active'))}
-  else{activeSub=val;document.querySelectorAll('#sub-filters .filter-btn').forEach(b=>b.classList.remove('active'))}
-  btn.classList.add('active'); applyFilters()
-}
-
-async function openModal(id) {
-  const modal = document.getElementById('item-modal')
-  modal.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,.77);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px'
-  modal.innerHTML=`<div class="modal-box"><div style="display:flex;align-items:center;justify-content:center;padding:48px"><div class="pokeball-loader"></div></div><button class="modal-close" onclick="closeModal()">✕</button></div>`
-  let item = itemCache[id] || allItems.find(i=>i.id===id)
-  if(!item){try{item=await apiFetch('https://pokeapi.co/api/v2/item/'+id)}catch(e){return}}
-  itemCache[id]=item
-  const sprite=item.sprites?.default
-  const catName=item.category?.name||''
-  const desc=item.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\n|\f/g,' ')||''
-  const effect=item.effect_entries?.find(e=>e.language.name==='en')?.effect?.replace(/\$effect_chance/g,item.effect_chance||'')||''
-  const attrs=(item.attributes||[]).map(a=>a.name)
-  const heldBy=(item.held_by_pokemon||[]).slice(0,24)
-  const imgH=sprite?`<img class="modal-img" src="${sprite}" alt="${item.name}" onerror="this.style.display='none'">`:`<div style="font-size:36px;opacity:.3">📦</div>`
-  const attrH=attrs.length?`<div class="attr-tags">${attrs.map(a=>`<span class="attr-tag">${cap(slug(a))}</span>`).join('')}</div>`:''
-  const heldH=heldBy.length?heldBy.map(h=>{const pid=h.pokemon.url.split('/').filter(Boolean).pop();return`<a class="held-chip" href="pokemon.html?id=${pid}"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pid}.png" alt="${h.pokemon.name}">${cap(h.pokemon.name)}</a>`}).join(''):''
-  modal.querySelector('.modal-box').innerHTML=`
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-hero">
-      <div class="modal-img-wrap">${imgH}</div>
-      <div><div class="modal-title">${slug(item.name)}</div>
-        <div class="modal-badges"><span class="modal-badge">${cap(slug(catName))}</span>${item.cost?`<span class="modal-badge">₽${item.cost.toLocaleString()}</span>`:''}</div>
-        ${attrH}
-      </div>
-    </div>
-    <div class="modal-stats-grid">
-      <div class="msb"><div class="msb-l">Custo</div><div class="msb-v">${item.cost?'₽'+item.cost.toLocaleString():'—'}</div></div>
-      <div class="msb"><div class="msb-l">Fling Pwr</div><div class="msb-v">${item.fling_power??'—'}</div></div>
-      <div class="msb"><div class="msb-l">Fling Eff</div><div class="msb-v" style="font-size:11px">${item.fling_effect?.name?cap(slug(item.fling_effect.name)):'—'}</div></div>
-    </div>
-    ${desc?`<div class="modal-desc">${desc}</div>`:''}
-    ${effect&&effect!==desc?`<div class="modal-desc" style="border-color:rgba(232,255,71,.2)">${effect}</div>`:''}
-    ${heldH?`<div class="modal-sec">Carregado por</div><div class="held-grid">${heldH}</div>`:''}
-  `
-}
-function closeModal(){document.getElementById('item-modal').style.display='none'}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()})
-
-function makeCard(item) {
-  const sprite=item.sprites?.default
-  const catName=item.category?.name||''
-  const shortEff=item.effect_entries?.find(e=>e.language.name==='en')?.short_effect||''
-  const imgH=sprite?`<img class="item-img" src="${sprite}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="item-img-placeholder" style="display:none;font-size:20px;opacity:.3">📦</div>`:`<div style="font-size:20px;opacity:.3">📦</div>`
-  return `<div class="item-card" onclick="openModal(${item.id})">
-    <div class="item-img-wrap">${imgH}</div>
-    <div class="item-name">${slug(item.name)}</div>
-    <div class="item-cat-badge">${cap(slug(catName))}</div>
-    ${shortEff?`<div class="item-effect-preview">${shortEff}</div>`:''}
-    ${item.cost?`<div class="item-cost">₽${item.cost.toLocaleString()}</div>`:''}
-    <button class="item-detail-btn" onclick="event.stopPropagation();openModal(${item.id})">Ver detalhes →</button>
-  </div>`
-}
-
-
-const PAGE_GROUP = 'berries'
-
-/* Category sets for this page */
-const BATTLE_CATS = new Set(['stat-boosts', 'flutes', 'scarves', 'effort-drop', 'effort-training', 'battle-items', 'held-items', 'revival', 'training', 'healing', 'species-specific', 'pp-recovery', 'plates', 'choice', 'type-enhancement', 'other-held-items', 'type-protection', 'in-a-pinch', 'vitamins'])
-const MED_CATS    = new Set(['picky-healing', 'status-cures', 'medicine', 'miracle-shooter'])
-const EVO_CATS    = new Set(['evolution'])
-const BERRY_CATS  = new Set(['effort-drop', 'baking-only', 'berry-pockets', 'berries', 'in-a-pinch'])
-const SKIP_CATS   = new Set(['standard-balls', 'apricorn-balls', 'mega-stones', 'special-balls', 'pokeballs', 'z-crystals'])
-
-function matchesPage(catName) {
-  if (SKIP_CATS.has(catName)) return false
-  if (PAGE_GROUP === 'battle')    return BATTLE_CATS.has(catName)
-  if (PAGE_GROUP === 'medicine')  return MED_CATS.has(catName)
-  if (PAGE_GROUP === 'evolution') return EVO_CATS.has(catName)
-  if (PAGE_GROUP === 'berries')   return BERRY_CATS.has(catName)
-  if (PAGE_GROUP === 'others')    return !BATTLE_CATS.has(catName) && !MED_CATS.has(catName) && !EVO_CATS.has(catName) && !BERRY_CATS.has(catName) && !SKIP_CATS.has(catName)
-  return false
+function setCat(val, btn) {
+  activeCat = val
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  applyFilters()
 }
 
 function applyFilters() {
   const q = document.getElementById('item-search').value.toLowerCase().trim()
-  let filtered = allItems.filter(i => matchesPage(i.category?.name))
-  if (activeFilter !== 'all') filtered = filtered.filter(i => i.category?.name === activeFilter)
-  if (q) filtered = filtered.filter(i => i.name.includes(q) || i.name.replace(/-/g,' ').includes(q))
+  let filtered = pageItems()
+  if (activeCat !== 'all') filtered = filtered.filter(i => i.category?.name === activeCat)
+  if (q) filtered = filtered.filter(i => i.name.replace(/-/g, ' ').includes(q))
   renderItems(filtered)
   updateStatsBar(filtered)
 }
 
 function updateStatsBar(items) {
-  const set = items || allItems.filter(i => matchesPage(i.category?.name))
+  const all = pageItems()
+  const shown = items || all
   document.getElementById('stats-bar').innerHTML =
-    `<div class="stat-pill">Total <strong>${set.length}</strong></div>` +
+    `<div class="stat-pill">Mostrando <strong>${shown.length}</strong></div>` +
+    `<div class="stat-pill">Total nesta aba <strong>${all.length}</strong></div>` +
     `<div class="stat-pill">Carregados <strong>${allItems.length}</strong></div>`
+}
+
+async function openModal(id) {
+  const modal = document.getElementById('item-modal')
+  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.77);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px'
+  modal.innerHTML = `<div class="modal-box"><div style="display:flex;align-items:center;justify-content:center;padding:48px"><div class="pokeball-loader"></div></div><button class="mcl" onclick="closeModal()">✕</button></div>`
+
+  let item = itemCache[id] || allItems.find(i => i.id === id)
+  if (!item) { try { item = await apiFetch('https://pokeapi.co/api/v2/item/' + id) } catch(e) { return } }
+  itemCache[id] = item
+
+  const sprite = item.sprites?.default
+  const catName = item.category?.name || ''
+  const desc = item.flavor_text_entries?.find(e => e.language.name === 'en')?.flavor_text?.replace(/\n|\f/g, ' ') || ''
+  const effect = item.effect_entries?.find(e => e.language.name === 'en')?.effect?.replace(/\$effect_chance/g, item.effect_chance || '') || ''
+  const attrs = (item.attributes || []).map(a => a.name)
+  const heldBy = (item.held_by_pokemon || []).slice(0, 24)
+
+  const imgH = sprite
+    ? `<img class="mimg" src="${sprite}" alt="${item.name}" onerror="this.style.display='none'">`
+    : `<div style="font-size:36px;opacity:.3">📦</div>`
+
+  const attrH = attrs.length
+    ? `<div class="attr-tags">${attrs.map(a => `<span class="attr-tag">${cap(slug(a))}</span>`).join('')}</div>` : ''
+
+  const heldH = heldBy.length ? heldBy.map(h => {
+    const pid = h.pokemon.url.split('/').filter(Boolean).pop()
+    return `<a class="held-chip" href="pokemon.html?id=${pid}"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pid}.png" alt="${h.pokemon.name}">${cap(h.pokemon.name)}</a>`
+  }).join('') : ''
+
+  modal.querySelector('.modal-box').innerHTML = `
+    <button class="mcl" onclick="closeModal()">✕</button>
+    <div class="mhero">
+      <div class="mimg-wrap">${imgH}</div>
+      <div>
+        <div class="mtitle">${slug(item.name)}</div>
+        <div class="mbadges">
+          <span class="mbadge">${cap(slug(catName))}</span>
+          ${item.cost ? `<span class="mbadge">₽${item.cost.toLocaleString()}</span>` : ''}
+        </div>
+        ${attrH}
+      </div>
+    </div>
+    <div class="mstats">
+      <div class="msb"><div class="msb-l">Custo</div><div class="msb-v">${item.cost ? '₽' + item.cost.toLocaleString() : '—'}</div></div>
+      <div class="msb"><div class="msb-l">Fling Pwr</div><div class="msb-v">${item.fling_power ?? '—'}</div></div>
+      <div class="msb"><div class="msb-l">Fling Eff</div><div class="msb-v" style="font-size:11px">${item.fling_effect?.name ? cap(slug(item.fling_effect.name)) : '—'}</div></div>
+    </div>
+    ${desc ? `<div class="mdesc">${desc}</div>` : ''}
+    ${effect && effect !== desc ? `<div class="mdesc" style="border-color:rgba(232,255,71,.2)">${effect}</div>` : ''}
+    ${heldH ? `<div class="msec">Carregado por</div><div class="held-grid">${heldH}</div>` : ''}
+  `
+}
+function closeModal() { document.getElementById('item-modal').style.display = 'none' }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal() })
+
+function makeCard(item) {
+  const sprite = item.sprites?.default
+  const catName = item.category?.name || ''
+  const shortEff = item.effect_entries?.find(e => e.language.name === 'en')?.short_effect || ''
+  const imgH = sprite
+    ? `<img class="item-img" src="${sprite}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;font-size:20px;opacity:.3">📦</div>`
+    : `<div style="font-size:20px;opacity:.3">📦</div>`
+  return `<div class="item-card" onclick="openModal(${item.id})">
+    <div class="item-img-wrap">${imgH}</div>
+    <div class="item-name">${slug(item.name)}</div>
+    <div class="item-cat-badge">${cap(slug(catName))}</div>
+    ${shortEff ? `<div class="item-effect-preview">${shortEff}</div>` : ''}
+    ${item.cost ? `<div class="item-cost">₽${item.cost.toLocaleString()}</div>` : ''}
+    <button class="item-detail-btn" onclick="event.stopPropagation();openModal(${item.id})">Ver detalhes →</button>
+  </div>`
 }
 
 function renderItems(items) {
   const grid = document.getElementById('items-grid')
-  if (!items.length && loadedCount === 0) { grid.innerHTML=`<div class="page-loading"><div class="pokeball-loader"></div><p>Carregando...</p></div>`; return }
-  if (!items.length) { grid.innerHTML=`<div class="no-results">Nenhum item encontrado.</div>`; return }
+  if (!items.length && loadedCount === 0) { grid.innerHTML = `<div class="page-loading"><div class="pokeball-loader"></div><p>Carregando...</p></div>`; return }
+  if (!items.length) { grid.innerHTML = `<div class="no-results">Nenhum item encontrado.</div>`; return }
   grid.innerHTML = items.map(makeCard).join('')
+}
+
+
+const PAGE_GROUP_SET = new Set(['baking-only','berries','in-a-pinch'])
+const SKIP_CATS_SET  = new Set(['apricorn-balls','mega-stones','pokeballs','special-balls','standard-balls','z-crystals'])
+
+function matchesPage(catName) {
+  if (!catName || SKIP_CATS_SET.has(catName)) return false
+  return PAGE_GROUP_SET.has(catName)
+}
+
+function pageItems() {
+  return allItems.filter(i => matchesPage(i.category?.name))
 }
 
 loadItems()
